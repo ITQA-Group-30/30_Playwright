@@ -32,22 +32,14 @@ module.exports = defineConfig({
   },
 
   /* Configure projects for major browsers */
-  projects: [  {
-    name: 'Google Chrome',    use: {
-      ...devices['Desktop Chrome'],      channel: 'chrome' // Use Google Chrome explicitly
-    },  },
-
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
-
-    // {
-    //   name: 'webkit',
-    //   use: { ...devices['Desktop Safari'] },
-    // },
-
-
+  projects: [
+    {
+      name: 'Google Chrome',
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome' // Use Google Chrome explicitly
+      },
+    },
     /* Test against mobile viewports. */
     // {
     //   name: 'Mobile Chrome',
@@ -76,4 +68,3 @@ module.exports = defineConfig({
   //   reuseExistingServer: !process.env.CI,
   // },
 });
-
