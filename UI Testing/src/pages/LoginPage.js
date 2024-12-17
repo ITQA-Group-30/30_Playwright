@@ -3,15 +3,16 @@ class LoginPage {
       this.page = page;
       
       // Locators
-      this.usernameInput = '#user-name';
-      this.passwordInput = '#password';
-      this.loginButton = '#login-button';
-      this.errorMessage = '[data-test="error"]';
+      this.usernameInput = 'input[name="username"]';
+      this.passwordInput = 'input[name="password"]';
+      this.loginButton = 'button[type="submit"]';
+      this.errorMessage = '.oxd-alert-content-text';
+      this.dashboardHeader = 'h6.oxd-topbar-header-breadcrumb-module';
     }
   
-    // Navigate to the login page
+    // Navigate to login page
     async navigate() {
-      await this.page.goto('https://www.saucedemo.com/');
+      await this.page.goto('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login');
     }
   
     // Enter username
@@ -37,13 +38,13 @@ class LoginPage {
       await this.clickLoginButton();
     }
   
-    // Check if error message is visible
-    async isErrorMessageVisible() {
-      return await this.page.locator(this.errorMessage).isVisible();
+    // Check if login form is visible
+    async isLoginFormVisible() {
+      return await this.page.locator(this.usernameInput).isVisible();
     }
   
-    // Get error message text
-    async getErrorMessageText() {
+    // Get error message
+    async getErrorMessage() {
       return await this.page.locator(this.errorMessage).textContent();
     }
   }
