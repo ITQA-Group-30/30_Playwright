@@ -1,0 +1,18 @@
+{
+    "default":{
+        "formateOptions":{
+            "snippentInterface": "async-await"
+        },
+        "paths":[
+            "tests/features/login.feature"
+        ],
+        "publishQuite": true,
+        "dryRun": false,
+        "require":[
+            "tests/steps/*.js"
+        ],
+        "format":[
+            "html:cucumber-report.html"
+        ]
+    }
+}
