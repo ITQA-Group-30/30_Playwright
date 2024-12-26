@@ -1,6 +1,6 @@
 const { request } = require('@playwright/test');
 
-class BookAPI {
+class BookAPI_For_Update_01 {
     constructor() {
         this.baseURL = 'http://localhost:7081/api/books';
         this.context = null;
@@ -29,6 +29,8 @@ class BookAPI {
             return {
                 status: response.status(),
                 body: await response.json().catch(() => ({}))
+                
+                
             };
         } catch (error) {
             console.error('Error updating book:', error);
@@ -59,4 +61,4 @@ class BookAPI {
     }
 }
 
-module.exports = BookAPI;
+module.exports = BookAPI_For_Update_01;
