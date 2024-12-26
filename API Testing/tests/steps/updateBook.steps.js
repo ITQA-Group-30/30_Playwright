@@ -1,6 +1,6 @@
 const { Given, When, Then, After, setDefaultTimeout } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
-const BookAPI = require('../../src/pages/BookAPI');
+const BookAPI = require('../../src/pages/BookAPI_For_Update_01');
 
 // Increase timeout to 30 seconds
 setDefaultTimeout(30 * 1000);

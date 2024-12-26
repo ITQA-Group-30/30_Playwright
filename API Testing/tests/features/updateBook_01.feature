@@ -27,6 +27,6 @@ Feature: Update Book API Tests
   Scenario: Update Non-Existent Book
     When I try to update a non-existent book
       | id  | title              | author          |
-      | 2 | Updated Book Title | Updated Author  |
+      | 999 | Updated Book Title | Updated Author  |
     Then the response status code should be 404
     And the response message should be "Book is not found."
