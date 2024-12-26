@@ -4,12 +4,15 @@
             "snippentInterface": "async-await"
         },
         "paths":[
-            "tests/features/login.feature"
+            "tests/features/updateBook.feature"
         ],
         "publishQuite": true,
         "dryRun": false,
         "require":[
-            "tests/steps/*.js"
+            "tests/steps/*.steps.js",
+            "tests/support/world.js"
+
+            
         ],
         "format":[
             "html:cucumber-report.html"
