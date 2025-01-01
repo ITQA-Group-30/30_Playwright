@@ -1,6 +1,6 @@
 const { Given, When, Then, setDefaultTimeout } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
-const { BooksAPI } = require('../../src/test'); // Ensure path is correct
+const { BooksAPI } = require('../../../src/test'); // Ensure path is correct
 
 // Increase timeout to 30 seconds
 setDefaultTimeout(30 * 1000);
