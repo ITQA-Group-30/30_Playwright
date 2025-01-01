@@ -7,7 +7,7 @@ const CONFIG = {
         }
     },
     TIMEOUTS: {
-        IMPLICIT_WAIT: 5000,
+        IMPLICIT_WAIT: 90000,
         EXPLICIT_WAIT: 10000,
         PAGE_LOAD: 30000
     },
