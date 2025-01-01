@@ -25,9 +25,9 @@ class BooksAPI {
 
   async getBookById(id, auth) {
     return await this.context.get(`${this.baseUrl}/api/books/${id}`, {
-      headers: {
-        'Authorization': `Basic ${auth}`
-      }
+        headers: {
+            'Authorization': `Basic ${auth}`,
+        },
     });
   }
 
