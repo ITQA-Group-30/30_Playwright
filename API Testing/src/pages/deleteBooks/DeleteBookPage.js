@@ -5,7 +5,13 @@ class DeleteBookPage {
     this.headers = { "Content-Type": "application/json" };
   }
 
-  /** Helper to create a book */
+  /**
+   * Create a book
+   * @param {number|null} id - Optional book ID
+   * @param {string} title - Book title
+   * @param {string} author - Book author
+   * @returns {Promise<number>} - Created book ID
+   */
   async createBook(id, title = "Test Book", author = "Test Author") {
     const payload = { id, title, author };
     const response = await this.request.post(`${this.baseUrl}/api/books`, {
@@ -18,11 +24,21 @@ class DeleteBookPage {
         `Failed to create book: ${response.status()} ${await response.text()}`
       );
     }
+
     const responseBody = await response.json();
+    if (!responseBody.id && id == null) {
+      throw new Error("Response does not contain a valid book ID.");
+    }
+
     return responseBody.id || id;
   }
 
-  /** Helper to delete a book */
+  /**
+   * Delete a book by ID
+   * @param {number} id - Book ID
+   * @param {string|null} token - Optional authentication token
+   * @returns {Promise<Response>} - API response
+   */
   async deleteBook(id, token = null) {
     const authHeaders = token
       ? { Authorization: `Bearer ${token}`, ...this.headers }
@@ -35,16 +51,32 @@ class DeleteBookPage {
       }
     );
 
+    if (response.status === 404) {
+      throw new Error("Book not found.");
+    }
+
     return response;
   }
 
-  /** Helper to get a book by ID */
+  /**
+   * Get a book by ID
+   * @param {number} id - Book ID
+   * @returns {Promise<Response>} - API response
+   */
   async getBookById(id) {
     const response = await this.request.get(`${this.baseUrl}/api/books/${id}`);
+    if (response.status === 404) {
+      throw new Error("Book not found.");
+    }
     return response;
   }
 
-  /** Helper to login and get token */
+  /**
+   * Login and retrieve token
+   * @param {string} username - Username
+   * @param {string} password - Password
+   * @returns {Promise<string>} - Authentication token
+   */
   async login(username, password) {
     const response = await this.request.post(`${this.baseUrl}/auth/login`, {
       data: { username, password },
@@ -56,7 +88,12 @@ class DeleteBookPage {
         `Login failed: ${response.status()} ${await response.text()}`
       );
     }
+
     const responseBody = await response.json();
+    if (!responseBody.token) {
+      throw new Error("Login response does not contain a token.");
+    }
+
     return responseBody.token;
   }
 }

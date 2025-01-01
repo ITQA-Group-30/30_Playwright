@@ -10,7 +10,7 @@ Feature: Delete a book from the library system
     And the book should no longer exist
 
   Scenario: Try to delete a non-existent book
-    When I send a DELETE request to "/api/books/2"
+    When I send a DELETE request to "/api/books/999"
     Then the response status should be 404
 
   Scenario: Unauthorized user tries to delete a book
@@ -23,5 +23,5 @@ Feature: Delete a book from the library system
     Then the response status should be 401
 
   Scenario: Delete a book using an invalid ID
-    When I send a DELETE request to "/api/books/2"
+    When I send a DELETE request to "/api/books/abc"
     Then the response status should be 400
