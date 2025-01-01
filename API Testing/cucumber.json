@@ -4,12 +4,12 @@
       "snippentInterface": "async-await"
     },
     "paths":[
-      "tests/features/createBook.feature"
+      "tests/features/**/*.feature"
     ],
     "publishQuite": true,
     "dryRun": false,
     "require":[
-      "tests/steps/*.steps.js",
+      "tests/steps/**/*.steps.js",
       "tests/support/world.js"
 
 

@@ -1,6 +1,6 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
-const LibraryAPI = require('../../src/pages/BookAPI_For_Update_02');
+const LibraryAPI = require('../../../src/pages/updateBooks/BookAPI_For_Update_02');
 
 let api;
 let apiResponse;
