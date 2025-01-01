@@ -1,21 +1,21 @@
 {
-    "default":{
-        "formateOptions":{
-            "snippentInterface": "async-await"
-        },
-        "paths":[
-            "tests/features/getAllBooks.feature"
-        ],
-        "publishQuite": true,
-        "dryRun": false,
-        "require":[
-            "tests/steps/*.steps.js",
-            "tests/support/world.js"
+  "default":{
+    "formateOptions":{
+      "snippentInterface": "async-await"
+    },
+    "paths":[
+      "tests/features/createBook.feature"
+    ],
+    "publishQuite": true,
+    "dryRun": false,
+    "require":[
+      "tests/steps/*.steps.js",
+      "tests/support/world.js"
 
-            
-        ],
-        "format":[
-            "html:cucumber-report.html"
-        ]
-    }
+
+    ],
+    "format":[
+      "html:cucumber-report.html"
+    ]
+  }
 }
