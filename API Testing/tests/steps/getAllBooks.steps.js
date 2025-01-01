@@ -10,7 +10,7 @@ let response;
 
 console.log("comes here");
 
-Given('I am logged in as {string} with password {string}', async function (username, password) {
+Given('I am logged in as a {string} with password {string}', async function (username, password) {
     console.log('Attempting to log in...');
     bookAPI = new BooksAPI();  // Initialize BooksAPI
     await bookAPI.init();  // Initialize context
@@ -31,11 +31,11 @@ Given('there are books in the database', async function () {
     expect(response.status()).toBe(201); // Ensure book is created successfully
 });
 
-When('I send a GET request to \\/api\\/books', async function () {
+When('I send a GET request to', async function () {
     response = await bookAPI.getAllBooks(this.auth); // Fetch all books using GET API
 });
 
-Then('the response status code should be {int}', async function (expectedStatus) {
+Then('the response status code should be a {int}', async function (expectedStatus) {
     expect(response.status()).toBe(expectedStatus);
 });
 
