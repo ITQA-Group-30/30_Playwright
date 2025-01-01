@@ -1,6 +1,6 @@
 const { Given, When, Then, After } = require("@cucumber/cucumber");
 const { test, expect } = require("@playwright/test");
-const DeleteBookPage = require("../../src/pages/DeleteBookPage");
+const DeleteBookPage = require("../../../src/pages/deleteBooks/DeleteBookPage");
 
 const BASE_URL = process.env.BASE_URL || "http://localhost:7081";
 const HEADERS = { "Content-Type": "application/json" };
