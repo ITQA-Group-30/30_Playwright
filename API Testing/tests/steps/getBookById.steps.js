@@ -27,12 +27,12 @@ Given('a book exists in the database with a valid id', async function () {
     bookId = createdBook.id;  // Save the book ID for later use
 });
 
-When('I send a GET request to /api/books/{int}', async function (id) {
+When('I send a GET request to {int}', async function (id) {
     // Replace the {id} with the actual bookId
     response = await bookAPI.getBookById(bookId, 'admin:password');  // Fetch book details using the stored bookId
 });
 
-Then('the response status code should be {int}', async function (expectedStatus) {
+Then('the response status code should be a {int}', async function (expectedStatus) {
     expect(response.status()).toBe(expectedStatus);
 });
 
@@ -48,11 +48,11 @@ Given('no book exists in the database with the given id', async function () {
     bookId = 'invalid-id';  // Set an invalid book ID for testing
 });
 
-When('I send a GET request to /api/books/{int} with an invalid id', async function () {
+When('I send a GET request to {int} with an invalid id', async function () {
     response = await bookAPI.getBookById(bookId, 'admin:password');  // Fetch book with an invalid ID
 });
 
-Then('the response status code should be {int} for not found', async function (expectedStatus) {
+Then('the response status code should a {int} for not found', async function (expectedStatus) {
     expect(response.status()).toBe(expectedStatus);  // Expect a 404 status
 });
 
@@ -66,11 +66,11 @@ Given('the user is not authorized', async function () {
     await bookAPI.init();  // Initialize context
 });
 
-When('I send a GET request to /api/books/{int} with an invalid authorization token', async function () {
+When('I send a GET request to {int} with an invalid authorization token', async function () {
     // Send request with an invalid token (or no token)
     response = await bookAPI.getBookById(bookId, 'invalid-token');  // Use an invalid token
 });
 
-Then('the response status code should be {int} for unauthorized', async function (expectedStatus) {
+Then('the response status code should  {int} for unauthorized', async function (expectedStatus) {
     expect(response.status()).toBe(expectedStatus);  // Expect a 401 status
 });
