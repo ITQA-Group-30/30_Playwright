@@ -4,7 +4,7 @@
             "snippentInterface": "async-await"
         },
         "paths":[
-            "tests/features/updateBook_01.feature"
+            "tests/features/createBook.feature"
         ],
         "publishQuite": true,
         "dryRun": false,
