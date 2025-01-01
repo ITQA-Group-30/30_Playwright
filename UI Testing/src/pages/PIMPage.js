@@ -1,24 +1,21 @@
 const BasePage = require('./BasePage');
+const CONFIG = require('../utils/config');
 
 class PIMPage extends BasePage {
     constructor(page, baseURL) {
         super(page, baseURL);
-        this.employeeNameInput = '[placeholder="Type for hints..."]';
-        this.searchButton = 'button[type="submit"]';
-        this.employeeList = '.oxd-table-card';
-        this.addButton = '.oxd-button--secondary';
+        this.locators = this.locators.PIM;
     }
 
     async searchEmployee(name) {
-        await this.waitForElement(this.employeeNameInput);
-        await this.page.type(this.employeeNameInput, name);
-        await this.page.click(this.searchButton);
+        await this.typeText(this.locators.EMPLOYEE_NAME_INPUT, name);
+        await this.clickElement(this.locators.SEARCH_BUTTON);
         await this.page.waitForTimeout(1000);
     }
 
     async getEmployeeCount() {
-        await this.waitForElement(this.employeeList);
-        const elements = await this.page.$$(this.employeeList);
+        await this.waitForElement(this.locators.EMPLOYEE_LIST);
+        const elements = await this.page.$$(this.locators.EMPLOYEE_LIST);
         return elements.length;
     }
 }
