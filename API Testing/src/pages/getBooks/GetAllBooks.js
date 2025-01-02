@@ -1,9 +1,11 @@
 const { request } = require('playwright');
+const CONFIG = require('../../utils/config');
 
 class BookAPI {
-    async init(username, password) {
+    async init() {
+        const { baseURL, username, password } = CONFIG;
         this.context = await request.newContext({
-            baseURL: 'http://localhost:7081', // Replace with your API base URL
+            baseURL: `${baseURL}/api/books`, // Dynamically set the API base URL
             extraHTTPHeaders: {
                 Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
             },
@@ -11,18 +13,18 @@ class BookAPI {
     }
 
     async createBook(book) {
-        return await this.context.post('/api/books', {
+        return await this.context.post('', { // Endpoint path is relative to baseURL
             data: book,
         });
     }
 
     async getAllBooks() {
-        return await this.context.get('/api/books');
+        return await this.context.get(''); // Fetch all books
     }
 
     async deleteAllBooks() {
         // Assuming a DELETE API for clearing books exists
-        return await this.context.delete('/api/books');
+        return await this.context.delete('');
     }
 }
 
