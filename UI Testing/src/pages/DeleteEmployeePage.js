@@ -6,20 +6,21 @@ class DeleteEmployeePage extends BasePage {
         super(page, baseURL);
 
         this.locators = {
-            EMPLOYEE_ID_INPUT: '[placeholder="0000"]',  // More specific selector for ID input
             SEARCH_BUTTON: 'button[type="submit"]',
-            DELETE_BUTTON: 'button i.bi-trash',  // More specific selector for delete button
-            CONFIRM_DELETE_BUTTON: 'button.oxd-button--label-danger',
+            DELETE_BUTTON: 'button:has-text("")',
+            CONFIRM_DELETE_BUTTON: 'button:has-text(" Yes, Delete")',
             EMPLOYEE_LIST: '.oxd-table-body',
             NO_RECORDS_MESSAGE: '.orangehrm-horizontal-padding',
             SEARCH_FORM: '.oxd-form',
             SPINNER: '.oxd-loading-spinner',
+            EMPLOYEE_ROW: '.oxd-table-card',
+            EMPLOYEE_ID_CELL: '.oxd-table-cell'
         };
 
         this.timeouts = {
-            search: 60000,  // Increased timeout for search operations
+            search: 60000,
             delete: 30000,
-            navigation: 30000,
+            navigation: 30000
         };
     }
 
@@ -34,64 +35,71 @@ class DeleteEmployeePage extends BasePage {
                 timeout: this.timeouts.navigation
             });
 
-            // Wait for any loading spinner to disappear
-            const spinner = this.page.locator(this.locators.SPINNER);
-            if (await spinner.isVisible())
-                await spinner.waitFor({ state: 'hidden', timeout: this.timeouts.navigation });
-
+            // Additional wait to ensure the page is fully interactive
+            await this.page.waitForTimeout(2000);
         } catch (error) {
             throw new Error(`Failed to navigate to employee list: ${error.message}`);
         }
     }
 
-    async searchEmployeeById(id) {
+    async searchEmployeeById(targetId) {
         try {
-            // Wait for the search form and ensure it's interactive
+            // Wait for the search form to be visible and interactive
             await this.page.waitForSelector(this.locators.SEARCH_FORM, {
                 state: 'visible',
                 timeout: this.timeouts.search
             });
 
-            // Find and fill the employee ID input
-            const idInput = this.page.locator(this.locators.EMPLOYEE_ID_INPUT);
-            await idInput.waitFor({ state: 'visible', timeout: this.timeouts.search });
+            // Use getByRole for more reliable input selection
+            const idInput = this.page.getByRole('textbox').nth(2);
 
-            // Clear existing value and fill new ID with retry logic
-            await this.page.waitForTimeout(1000); // Small delay for stability
-            await idInput.clear();
-            await idInput.fill(id);
+            // Wait for the input to be visible and interactable
+            await idInput.waitFor({
+                state: 'visible',
+                timeout: this.timeouts.search
+            });
 
-            // Verify the input value
-            const inputValue = await idInput.inputValue();
-            if (inputValue !== id) {
-                await idInput.fill(id); // Retry if value wasn't set correctly
-            }
+            // Click the input first to ensure focus
+            await idInput.click();
 
-            // Click search and wait for results
-            await this.page.locator(this.locators.SEARCH_BUTTON).click();
+            // Small delay after click
+            await this.page.waitForTimeout(500);
 
-            // Wait for search results
+            // Type the ID instead of using fill() to ensure reliability
+            await idInput.press('Control+a');
+            await idInput.press('Backspace');
+            await idInput.type(targetId, { delay: 100 });
+
+            // Click search button
+            const searchButton = this.page.getByRole('button', { name: 'Search' });
+            await searchButton.click();
+
+            // Wait for network idle and response
             await Promise.all([
                 this.page.waitForLoadState('networkidle'),
                 this.page.waitForResponse(
-                    response => response.url().includes('/api/v2/pim/employees') &&
-                        response.status() === 200,
+                    response => response.url().includes('/api/v2/pim/employees'),
                     { timeout: this.timeouts.search }
                 )
             ]);
 
-            // Wait for any loading spinner to disappear
+            // Wait for spinner to disappear if present
             const spinner = this.page.locator(this.locators.SPINNER);
-            if (await spinner.isVisible())
-                await spinner.waitFor({ state: 'hidden', timeout: this.timeouts.search });
+            if (await spinner.isVisible()) {
+                await spinner.waitFor({
+                    state: 'hidden',
+                    timeout: this.timeouts.search
+                });
+            }
 
-            // Additional wait for UI stability
+            // Additional stability delay
             await this.page.waitForTimeout(2000);
 
-            // Verify results are displayed
+            // Check for results
             const employeeList = this.page.locator(this.locators.EMPLOYEE_LIST);
             await employeeList.waitFor({ timeout: this.timeouts.search });
 
+            return true;
         } catch (error) {
             throw new Error(`Failed to search for employee: ${error.message}`);
         }
@@ -99,20 +107,28 @@ class DeleteEmployeePage extends BasePage {
 
     async deleteEmployee() {
         try {
-            // Wait for and click the delete button
-            const deleteButton = this.page.locator(this.locators.DELETE_BUTTON).first();
-            await deleteButton.waitFor({ state: 'visible', timeout: this.timeouts.delete });
+            // Wait for and click the delete button using role
+            await this.page.waitForTimeout(1000); // Stability delay
+
+            const deleteButton = this.page.getByRole('button', { name: '' }).first();
+            await deleteButton.waitFor({
+                state: 'visible',
+                timeout: this.timeouts.delete
+            });
             await deleteButton.click();
 
-            // Wait for and click the confirm delete button
-            const confirmButton = this.page.locator(this.locators.CONFIRM_DELETE_BUTTON);
-            await confirmButton.waitFor({ state: 'visible', timeout: this.timeouts.delete });
+            // Confirm deletion
+            const confirmButton = this.page.getByRole('button', { name: ' Yes, Delete' });
+            await confirmButton.waitFor({
+                state: 'visible',
+                timeout: this.timeouts.delete
+            });
             await confirmButton.click();
 
-            // Wait for the deletion to complete
+            // Wait for deletion to complete
             await this.page.waitForLoadState('networkidle');
 
-            // Wait for success message or no records message
+            // Wait for success message
             await this.page.waitForSelector(this.locators.NO_RECORDS_MESSAGE, {
                 state: 'visible',
                 timeout: this.timeouts.delete
@@ -126,7 +142,6 @@ class DeleteEmployeePage extends BasePage {
 
     async verifyEmployeeDeleted() {
         try {
-            // Wait for the no records message to be visible
             const noRecordsMessage = this.page.locator(this.locators.NO_RECORDS_MESSAGE);
             await noRecordsMessage.waitFor({
                 state: 'visible',

@@ -16,6 +16,8 @@ Given('I am on the PIM page a', { timeout: 60000 }, async function() {
 
 When('I search for employee with id {string}', { timeout: 60000 }, async function(id) {
     try {
+        // Add a small delay before search
+        await this.page.waitForTimeout(1000);
         await deletePage.searchEmployeeById(id);
     } catch (error) {
         console.error('Search error:', error);
