@@ -1,15 +1,18 @@
 // File: src/pages/deleteBooks/DeleteBookPage.js
 const { request } = require("@playwright/test");
+const config = require("../../../src/utils/config");
 
 class DeleteBookPage {
-  constructor(baseURL = process.env.BASE_URL || "http://localhost:7081") {
+  constructor(baseURL = config.baseURL) {
+    // Use baseURL from config.js
     this.baseURL = `${baseURL}/api/books`;
     this.context = null;
   }
 
-  async init(username, password) {
+  // Initialize API context with optional credentials
+  async init(username = config.username, password = config.password) {
     if (this.context) {
-      await this.context.dispose(); // Clear old context
+      await this.context.dispose(); // Clear old context to avoid resource leaks
     }
     this.context = await request.newContext({
       baseURL: this.baseURL,
@@ -24,19 +27,14 @@ class DeleteBookPage {
       },
     });
   }
-  async createBook(bookDetails) {
-    console.log("Payload sent to createBook API:", bookDetails); // Log payload
-    const response = await this.context.post("", { data: bookDetails });
-    const body = await response.json().catch(() => ({ error: "Invalid JSON" }));
-    console.log("CreateBook Response:", body); // Log response
-    return { status: response.status(), body };
-  }
 
+  // Delete a book by ID
   async deleteBook(bookId) {
     if (!this.context) {
       throw new Error("API context is not initialized. Call init() first.");
     }
     if (!/^\d+$/.test(bookId)) {
+      console.warn(`Invalid book ID format: ${bookId}`);
       return {
         status: 400,
         body: { message: "Invalid parameter 'id'." },
@@ -47,12 +45,10 @@ class DeleteBookPage {
       const body = await response
         .json()
         .catch(() => ({ error: "Invalid JSON" }));
-      return {
-        status: response.status(),
-        body,
-      };
+      console.log(`DeleteBook Response for ID ${bookId}:`, body);
+      return { status: response.status(), body };
     } catch (error) {
-      console.error(`Error deleting book with ID ${bookId}:`, error);
+      console.error(`Error deleting book with ID ${bookId}:`, error.message);
       return { status: 500, body: { message: error.message } };
     }
   }
