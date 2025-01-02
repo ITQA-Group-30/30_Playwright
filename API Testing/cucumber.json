@@ -1,0 +1,21 @@
+{
+  "default":{
+    "formateOptions":{
+      "snippentInterface": "async-await"
+    },
+    "paths":[
+      "tests/features/**/*.feature"
+    ],
+    "publishQuite": true,
+    "dryRun": false,
+    "require":[
+      "tests/steps/**/*.steps.js",
+      "tests/support/world.js"
+
+
+    ],
+    "format":[
+      "html:cucumber-report.html"
+    ]
+  }
+}
