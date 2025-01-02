@@ -18,8 +18,11 @@ class BookAPI {
         });
     }
 
-    async getBookById(id) {
-        return await this.context.get(`/api/books/${id}`);
+    async getBookById(id, authHeader = null) {
+        const headers = authHeader
+            ? { Authorization: `Basic ${Buffer.from(authHeader).toString('base64')}` }
+            : {};
+        return await this.context.get(`/api/books/${id}`, { headers });
     }
 }
 
