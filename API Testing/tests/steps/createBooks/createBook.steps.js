@@ -8,15 +8,15 @@ setDefaultTimeout(30 * 1000);
 let bookAPI;
 let response;
 
-Given('I am logged in as {string} with password {string}', async function (username, password) {
+Given('I am logged in with valid credentials', async function () {
     try {
         bookAPI = new BookAPI();
-        await bookAPI.init(username, password);
+        await bookAPI.init();
     } catch (error) {
         console.error(`Error during login: ${error.message}`);
         throw error;
     }
-});
+})
 
 When('I create a book with the following details:', async function (dataTable) {
 
