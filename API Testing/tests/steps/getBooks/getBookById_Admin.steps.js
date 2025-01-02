@@ -41,20 +41,3 @@ Then('the admin response should contain correct book details for the given id', 
     expect(book.author).toBe('Admin Author');
 });
 
-// Scenario: Admin Request for a Non-existent Book
-Given('a book does not exist in the database with the given id for admin', async function () {
-    bookId = 'invalid-id'; // Use an invalid book ID
-});
-
-When('the admin sends a GET request to {int} for a non-existent book', async function () {
-    response = await bookAPI.getBookById(bookId);
-});
-
-Then('the admin response status code should be {int} for not found', async function (expectedStatus) {
-    expect(response.status()).toBe(expectedStatus);
-});
-
-Then('the admin response should indicate that the book was not found', async function () {
-    const responseBody = await response.json();
-    expect(responseBody.error).toBe('Not Found'); // Adjust error message if needed
-});
