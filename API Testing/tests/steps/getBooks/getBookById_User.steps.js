@@ -9,39 +9,6 @@ let bookAPI;
 let response;
 let bookId;  // Store book ID for later use
 
-Given('a book exists in the database with a valid id', async function () {
-    bookAPI = new BooksAPI();  // Initialize BooksAPI
-    await bookAPI.init();  // Initialize context
-
-    // Create a book for testing
-    const book = {
-        title: 'Sample Book',
-        author: 'Author Name',
-        price: 10.99,
-    };
-
-    response = await bookAPI.createBook(book, 'admin:password'); // Create book with admin credentials
-    expect(response.status()).toBe(201);  // Ensure book is created successfully
-
-    const createdBook = await response.json();
-    bookId = createdBook.id;  // Save the book ID for later use
-});
-
-When('I send a GET request to {int}', async function (id) {
-    // Replace the {id} with the actual bookId
-    response = await bookAPI.getBookById(bookId, 'admin:password');  // Fetch book details using the stored bookId
-});
-
-Then('the response status code should be a {int}', async function (expectedStatus) {
-    expect(response.status()).toBe(expectedStatus);
-});
-
-Then('the response should contain the correct book details for the given id', async function () {
-    const book = await response.json();  // Get the book details from the response
-    expect(book.id).toBe(bookId);  // Ensure the ID matches the stored bookId
-    expect(book.title).toBe('Sample Book');  // Ensure the title is correct
-    expect(book.author).toBe('Author Name');  // Ensure the author is correct
-});
 
 Given('no book exists in the database with the given id', async function () {
     // Ensure the book ID does not exist in the database

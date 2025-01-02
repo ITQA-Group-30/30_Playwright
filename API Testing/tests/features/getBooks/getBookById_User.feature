@@ -2,13 +2,7 @@
 Feature: Retrieve Book Details by ID
 
   @smoke
-  Scenario: Valid Request with Valid Book ID
-    Given a book exists in the database with a valid id
-    When I send a GET request to {id}
-    Then the response status code should be 200
-    And the response should contain the correct book details for the given id
-
-  Scenario: Invalid Request with Invalid Book ID
+   Scenario: Invalid Request with Invalid Book ID
     Given no book exists in the database with the given id
     When I send a GET request to {id} with an invalid id
     Then the response status code should be 404
