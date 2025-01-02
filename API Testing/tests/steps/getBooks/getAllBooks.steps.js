@@ -10,14 +10,6 @@ let response;
 
 console.log("comes here");
 
-Given('I am logged in as a {string} with password {string}', async function (username, password) {
-    console.log('Attempting to log in...');
-    bookAPI = new BooksAPI();  // Initialize BooksAPI
-    await bookAPI.init();  // Initialize context
-    const auth = Buffer.from(`${username}:${password}`).toString('base64');
-    console.log('Logged in successfully as:', username);
-    this.auth = auth; // Store authorization for later use
-});
 
 // Valid Request with Books in Database
 Given('there are books in the database', async function () {
