@@ -1,18 +1,17 @@
 # File: tests/features/deleteBook.feature
 Feature: Delete Book API Tests
-  As an admin or user of the library system
+  As a user of the library system
   I want to test the delete book functionality
   So that I can ensure it handles various scenarios correctly
 
   Background:
-    Given I am logged in as "admin" with password "password"
+    Given I am logged in as an authorized admin user
 
   @delete-existing-book
-Scenario: Successfully delete an existing book
-  Given a book with ID 1 exists in the system
-  When I delete the book with ID 1
-  Then the response status code should be 200
-  And the response message should be "Book deleted successfully."
+  Scenario: Successfully delete an existing book
+    When I delete the book with ID 1
+    Then the response status code should be 200
+    And the response message should be "Book deleted successfully."
 
   @delete-nonexistent-book
   Scenario: Attempt to delete a book that does not exist
@@ -22,7 +21,7 @@ Scenario: Successfully delete an existing book
 
   @unauthorized-delete
   Scenario: Attempt to delete a book as an unauthorized user
-    Given I am logged in as "user" with password "password"
+    Given I am logged in as an unauthorized user
     When I delete the book with ID 102
     Then the response status code should be 403
     And the response message should be "You are not authorized to delete the book."
