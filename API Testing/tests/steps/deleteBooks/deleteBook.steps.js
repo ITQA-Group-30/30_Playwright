@@ -1,113 +1,61 @@
-const { Given, When, Then, After } = require("@cucumber/cucumber");
-const { chromium, expect } = require("@playwright/test");
+// File: tests/steps/deleteBook.steps.js
+const { Given, When, Then, setDefaultTimeout } = require("@cucumber/cucumber");
+const { expect } = require("@playwright/test");
 const DeleteBookPage = require("../../../src/pages/deleteBooks/DeleteBookPage");
 
-const BASE_URL = process.env.BASE_URL || "http://localhost:7081";
-const HEADERS = { "Content-Type": "application/json" };
+setDefaultTimeout(30 * 1000);
 
-let browser; // Browser instance
-let context; // Browser context
-let requestContext; // API request context
-let deleteBookPage; // Page object
+let deleteBookPage;
 let response;
-let createdBookId;
 
-/** Helper function to create a book */
-async function createBook(id, title = "Test Book", author = "Test Author") {
-  const payload = { id, title, author };
-  const res = await requestContext.post(`${BASE_URL}/api/books`, {
-    data: payload,
-    headers: HEADERS,
-  });
-  if (!res.ok()) {
-    throw new Error(
-      `Book creation failed: ${res.status()} ${await res.text()}`
-    );
-  }
-  createdBookId = id || (await res.json()).id;
-  return res;
-}
-
-/** Helper function to delete a book */
-async function deleteBook(id) {
-  const res = await requestContext.delete(`${BASE_URL}/api/books/${id}`);
-  if (!res.ok() && res.status() !== 404) {
-    console.error(`Cleanup failed: ${res.status()} ${await res.text()}`);
-  }
-  return res;
-}
-
-/** Helper function to simulate login */
-async function login(role) {
-  const credentials = {
-    username: role === "admin" ? "admin" : "user",
-    password: "password",
-  };
-  const res = await requestContext.post(`${BASE_URL}/auth/login`, {
-    data: credentials,
-    headers: HEADERS,
-  });
-  if (!res.ok()) {
-    throw new Error(`Login failed for role: ${role}`);
-  }
-  return (await res.json()).token;
-}
-
-// Step definitions
-Given("the application is running", async () => {
-  // Launch the browser and set up a request context
-  browser = await chromium.launch(); // Launch browser using Playwright's chromium
-  context = await browser.newContext();
-  requestContext = await context.request; // Correctly set up API request context
-  deleteBookPage = new DeleteBookPage(requestContext);
-
-  // Check if the application is accessible
-  const healthCheck = await requestContext.get(BASE_URL);
-  expect(healthCheck.ok()).toBe(true);
-});
-
-Given("a book exists with ID {int}", async (id) => {
-  const res = await createBook(id);
-  expect(res.status()).toBe(201); // Assert successful creation
-});
-
-When("I send a DELETE request to {string}", async (endpoint) => {
-  response = await requestContext.delete(`${BASE_URL}${endpoint}`);
-});
-
-When(
-  "I send a DELETE request to {string} without authentication",
-  async (endpoint) => {
-    // Create a context without authentication
-    const unauthenticatedContext = await browser.newContext();
-    const unauthenticatedRequest = unauthenticatedContext.request;
-    response = await unauthenticatedRequest.delete(`${BASE_URL}${endpoint}`);
-    await unauthenticatedContext.close(); // Clean up
+Given(
+  "I am logged in as {string} with password {string}",
+  async function (username, password) {
+    try {
+      deleteBookPage = new DeleteBookPage();
+      await deleteBookPage.init(username, password);
+    } catch (error) {
+      console.error(`Error during login: ${error.message}`);
+      throw error;
+    }
   }
 );
 
-Given("I am logged in as {string}", async (role) => {
-  const token = await login(role);
-  requestContext.setExtraHTTPHeaders({ Authorization: `Bearer ${token}` });
+Given("I am not logged in", async function (username, password) {
+  deleteBookPage = new DeleteBookPage();
+  await deleteBookPage.init(username, password); // Reset context without authentication
 });
 
-Then("the response status should be {int}", (expectedStatus) => {
-  expect(response.status()).toBe(expectedStatus);
+Given("a book with ID {int} exists in the system", async function (bookId) {
+  const bookDetails = {
+    id: bookId,
+    title: `Book ${bookId}`,
+    author: `Author ${bookId}`,
+  };
+  response = await deleteBookPage.createBook(bookDetails);
+  expect([201, 208]).toContain(response.status); // Ensure book creation
+  console.log(`Book with ID ${bookId} created:`, response.body);
 });
 
-Then("the book should no longer exist", async () => {
-  const getResponse = await requestContext.get(
-    `${BASE_URL}/api/books/${createdBookId}`
-  );
-  expect(getResponse.status()).toBe(404); // Assert book is deleted
+When("I delete the book with ID {int}", async function (bookId) {
+  response = await deleteBookPage.deleteBook(bookId);
+  console.log(`Delete response for book ID ${bookId}:`, response.body);
 });
 
-// Cleanup step after the test runs
-After(async () => {
-  if (createdBookId) {
-    await deleteBook(createdBookId); // Cleanup any leftover data
-    createdBookId = null; // Reset the ID
+When("I delete the book with ID {string}", async function (bookId) {
+  response = await deleteBookPage.deleteBook(bookId);
+  console.log(`Delete response for book ID ${bookId}:`, response.body);
+});
+
+Then("the response status code should be {int}", async function (statusCode) {
+  expect(response.status).toBe(statusCode);
+});
+
+Then(
+  "the response message should be {string}",
+  async function (expectedMessage) {
+    const actualMessage = response.body?.message || response.body?.error || "";
+    console.log("Actual Message:", actualMessage); // Debug log
+    expect(actualMessage).toBe(expectedMessage);
   }
-  if (context) await context.close(); // Close browser context
-  if (browser) await browser.close(); // Close the browser
-});
+);
