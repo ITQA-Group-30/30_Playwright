@@ -1,6 +1,6 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
-const LibraryAPI = require('../../../src/pages/updateBooks/BookAPI_For_Update_02');
+const LibraryAPI = require('../../../src/pages/updateBooks/UpdateBookAPI');
 
 let api;
 let apiResponse;
@@ -10,19 +10,26 @@ Given('I am authenticated as {string} user with {string}', async function(userna
     await api.initialize(username, password);
 });
 
-When('I perform book update with valid data', async function(dataTable) {
-    const data = dataTable.hashes()[0];
-    apiResponse = await api.updateBookDetails(Number(data.id), data.title, data.author);
+When('I get all books', async function() {
+    apiResponse = await api.getAllBooks();
 });
 
-When('I perform book update without title', async function(dataTable) {
-    const data = dataTable.hashes()[0];
-    apiResponse = await api.updateBookDetails(Number(data.id), data.title, data.author);
+When('I get book with id {int}', async function(id) {
+    apiResponse = await api.getBookById(id);
 });
 
-When('I perform book update without author', async function(dataTable) {
+When('I create a new book', async function(dataTable) {
     const data = dataTable.hashes()[0];
-    apiResponse = await api.updateBookDetails(Number(data.id), data.title, data.author);
+    apiResponse = await api.createBook(data.title, data.author, data.id ? Number(data.id) : null);
+});
+
+When('I update book with id {int}', async function(id, dataTable) {
+    const data = dataTable.hashes()[0];
+    apiResponse = await api.updateBook(id, data.title, data.author);
+});
+
+When('I delete book with id {int}', async function(id) {
+    apiResponse = await api.deleteBook(id);
 });
 
 Then('API should respond with status code {int}', async function(expectedStatus) {
@@ -31,4 +38,12 @@ Then('API should respond with status code {int}', async function(expectedStatus)
 
 Then('API should return message {string}', async function(expectedMessage) {
     expect(apiResponse.body.message).toContain(expectedMessage);
+});
+
+Then('the response should contain a book with', async function(dataTable) {
+    const expectedData = dataTable.hashes()[0];
+    const book = apiResponse.body;
+    expect(book.id).toBeDefined();
+    if (expectedData.title) expect(book.title).toBe(expectedData.title);
+    if (expectedData.author) expect(book.author).toBe(expectedData.author);
 });
