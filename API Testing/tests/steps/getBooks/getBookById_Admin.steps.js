@@ -1,43 +1,39 @@
 const { Given, When, Then, setDefaultTimeout } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
-const { BookAPI } = require('../../../src/test'); // Adjust the path as necessary
+const BookAPI = require('../../../src/pages/getBooks/getBookById_Admin');
 
 setDefaultTimeout(30 * 1000);
 
 let bookAPI;
 let response;
 let bookId;
+let createdBook;
 
-// Scenario: Valid Admin Request with Valid Book ID
-Given('an admin creates a book in the database with a valid id', async function () {
+Given('I am authenticated as admin user', async function () {
     bookAPI = new BookAPI();
-    await bookAPI.init('admin', 'password'); // Authenticate as admin
-
-    const book = {
-        title: 'Admin Sample Book',
-        author: 'Admin Author',
-        price: 15.99,
-    };
-
-    response = await bookAPI.createBook(book);
-    expect(response.status()).toBe(201);
-
-    const createdBook = await response.json();
-    bookId = createdBook.id; // Save the created book's ID
+    await bookAPI.init('admin', 'password');
 });
 
-When('the admin sends a GET request to {int}', async function (id) {
-    response = await bookAPI.getBookById(bookId); // Fetch book by ID
+
+When('the admin sends a GET request to fetch the book', async function () {
+    response = await bookAPI.getBookById(bookId);
+});
+
+When('the admin sends a GET request with negative book id {string}', async function (id) {
+    response = await bookAPI.getBookById(parseInt(id));
 });
 
 Then('the admin response status code should be {int}', async function (expectedStatus) {
-    expect(response.status()).toBe(expectedStatus);
+    expect(response.status).toBe(expectedStatus);
 });
 
 Then('the admin response should contain correct book details for the given id', async function () {
-    const book = await response.json();
+    const book = response.body;
     expect(book.id).toBe(bookId);
     expect(book.title).toBe('Admin Sample Book');
     expect(book.author).toBe('Admin Author');
 });
 
+Then('the error message should be {string}', async function (expectedMessage) {
+    expect(response.body.message).toBe(expectedMessage);
+});
