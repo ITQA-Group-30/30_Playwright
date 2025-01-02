@@ -1,45 +1,48 @@
+// src/pages/UpdateBookAPI.js
 const { request } = require('@playwright/test');
+const Authentication = require('../../Authentication/Authentication');
+const CONFIG = require('../../utils/config');
 
 class UpdateBookAPI {
     constructor() {
-        this.baseURL = 'http://localhost:7081/api/books';
+        this.auth = new Authentication();
+        this.baseURL = `${CONFIG.baseURL}/api/books`;
         this.context = null;
     }
 
     async init(username, password) {
         try {
             await this.waitForBackendService();
-
-            this.context = await request.newContext({
-                baseURL: 'http://localhost:7081',
-                extraHTTPHeaders: {
-                    'Authorization': `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            this.context = await this.auth.init(username, password);
+            return this;
         } catch (error) {
-            console.error('Error initializing API:', error);
-            throw new Error('Failed to initialize API connection');
+            throw new Error(`Failed to initialize UpdateBookAPI: ${error.message}`);
         }
     }
 
     async waitForBackendService(maxRetries = 5, interval = 2000) {
         for (let i = 0; i < maxRetries; i++) {
             try {
-                const response = await fetch('http://localhost:7081/api/books');
-                if (response.status === 401) {
+                const response = await fetch(this.baseURL);
+                if (response.status === 401) { // Service is up but requires auth
                     return true;
                 }
             } catch (error) {
                 console.log(`Waiting for backend service... Attempt ${i + 1}/${maxRetries}`);
+                if (i === maxRetries - 1) {
+                    throw new Error('Backend service not available. Please ensure the JAR file is running.');
+                }
                 await new Promise(resolve => setTimeout(resolve, interval));
             }
         }
-        throw new Error('Backend service not available. Please ensure the JAR file is running.');
     }
 
     async updateBook(id, title, author) {
         try {
+            if (!this.context) {
+                throw new Error('API not initialized. Call init() first.');
+            }
+
             if (isNaN(id) && id !== undefined) {
                 return {
                     status: 400,
@@ -47,7 +50,7 @@ class UpdateBookAPI {
                 };
             }
 
-            const response = await this.context.put(`${this.baseURL}/${id}`, {
+            const response = await this.context.put(`/api/books/${id}`, {
                 data: {
                     id: id,
                     title: title,
@@ -72,7 +75,11 @@ class UpdateBookAPI {
 
     async updateBookEmptyBody(id) {
         try {
-            const response = await this.context.put(`${this.baseURL}/${id}`, {
+            if (!this.context) {
+                throw new Error('API not initialized. Call init() first.');
+            }
+
+            const response = await this.context.put(`/api/books/${id}`, {
                 data: {}
             });
 
@@ -93,15 +100,14 @@ class UpdateBookAPI {
 
     async updateBookWithoutAuth(id, title, author) {
         try {
-            // Create a new context without authentication
             const noAuthContext = await request.newContext({
-                baseURL: 'http://localhost:7081',
+                baseURL: CONFIG.baseURL,
                 extraHTTPHeaders: {
                     'Content-Type': 'application/json'
                 }
             });
 
-            const response = await noAuthContext.put(`${this.baseURL}/${id}`, {
+            const response = await noAuthContext.put(`/api/books/${id}`, {
                 data: {
                     id: id,
                     title: title,
