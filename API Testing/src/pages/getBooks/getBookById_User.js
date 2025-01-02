@@ -1,9 +1,11 @@
 const { request } = require('playwright');
+const CONFIG = require('../../utils/config');
 
 class BookAPI {
-    async init(username, password) {
+    async init() {
+        const { baseURL, username, password } = CONFIG;
         this.context = await request.newContext({
-            baseURL: 'http://localhost:7081', // Replace with the API's base URL
+            baseURL: baseURL, // Dynamically set the API's base URL
             extraHTTPHeaders: {
                 Authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
             },
