@@ -1,25 +1,26 @@
 const BasePage = require('./BasePage');
+const CONFIG = require('../utils/config');
 
 class AdminPage extends BasePage {
     constructor(page, baseURL) {
         super(page, baseURL);
-        this.usernameInput = '[placeholder="Type for hints..."]';
-        this.userRoleDropdown = '(//div[contains(@class, "oxd-select-wrapper")])[1]';
-        this.searchButton = 'button[type="submit"]';
-        this.userRecords = '.oxd-table-card';
+        this.locators = this.locators.ADMIN;
     }
 
     async searchUser(username) {
-        await this.waitForElement(this.usernameInput);
-        await this.page.type(this.usernameInput, username);
-        await this.page.click(this.searchButton);
+        await this.typeText(this.locators.USERNAME_INPUT, username);
+        await this.clickElement(this.locators.SEARCH_BUTTON);
         await this.page.waitForTimeout(1000);
     }
 
     async getUserCount() {
-        await this.waitForElement(this.userRecords);
-        const elements = await this.page.$$(this.userRecords);
+        await this.waitForElement(this.locators.USER_RECORDS);
+        const elements = await this.page.$$(this.locators.USER_RECORDS);
         return elements.length;
+    }
+
+    async setUserRole(role) {
+        await this.selectDropdownOption(this.locators.USER_ROLE_DROPDOWN, role);
     }
 }
 

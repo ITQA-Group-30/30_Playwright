@@ -1,51 +1,36 @@
 const { request } = require('@playwright/test');
+const CONFIG = require('../../utils/config');
 
 class BookAPI {
     constructor() {
-        this.baseURL = 'http://localhost:7081/api/books';
         this.context = null;
+        this.baseURL = `${CONFIG.baseURL}/api/books`;
     }
 
-    async init(username, password) {
+    async init() {
         this.context = await request.newContext({
-            baseURL: 'http://localhost:7081',
+            baseURL: CONFIG.baseURL,
             extraHTTPHeaders: {
-                'Authorization': `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
-                'Content-Type': 'application/json'
-            }
+                'Authorization': `Basic ${Buffer.from(`${CONFIG.username}:${CONFIG.password}`).toString('base64')}`,
+                'Content-Type': 'application/json',
+            },
         });
     }
 
     async createBook(bookDetails) {
         try {
             const response = await this.context.post(this.baseURL, {
-                data: bookDetails
+                data: bookDetails,
             });
             return {
                 status: response.status(),
-                body: await response.json().catch(() => ({}))
+                body: await response.json().catch(() => ({})),
             };
         } catch (error) {
             console.error('Error creating book:', error);
             return {
                 status: 500,
-                body: { message: error.message }
-            };
-        }
-    }
-
-    async getAllBooks() {
-        try {
-            const response = await this.context.get(this.baseURL);
-            return {
-                status: response.status(),
-                body: await response.json().catch(() => ({}))
-            };
-        } catch (error) {
-            console.error('Error fetching all books:', error);
-            return {
-                status: 500,
-                body: { message: error.message }
+                body: { message: error.message },
             };
         }
     }
