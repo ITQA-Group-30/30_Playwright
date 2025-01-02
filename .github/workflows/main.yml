@@ -12,12 +12,14 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: lts/*
+        node-version: '20'
     - name: Install dependencies
-      working-directory: ./ui
+      working-directory: ./UI Testing
       run: npm ci
     - name: Install Playwright Browsers
+      working-directory: ./UI Testing
       run: npx playwright install --with-deps
+      
     - name: Run Playwright tests
       run: npx playwright test
     - uses: actions/upload-artifact@v4
