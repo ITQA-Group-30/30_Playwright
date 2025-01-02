@@ -50,25 +50,7 @@ Then('the response message should be {string}', async function (message) {
     expect(responseBody.message).toBe(message);
 });
 
-// Additional Scenarios
 
-When('I create a book without bookname', async function () {
-    try {
-        response = await bookAPI.createBook({ title: "Author Name" }); // Changed to title instead of author
-    } catch (error) {
-        console.error(`Error during book creation: ${error.message}`);
-        throw error;
-    }
-});
-
-When('I create a book without author', async function () {
-    try {
-        response = await bookAPI.createBook({ title: "Book Title" });
-    } catch (error) {
-        console.error(`Error during book creation: ${error.message}`);
-        throw error;
-    }
-});
 
 When('I create a new book with the existing bookname and author', async function () {
     try {
