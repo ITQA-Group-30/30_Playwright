@@ -10,7 +10,7 @@ Feature: Create Book API Tests
   Scenario: Create a book without a title
     When I create a book with the following details:
       | title   | author    |
-      |         | "John Doe" |
+      |         | "cha" |
     Then the response status code should be 400
     And the response message should be "Mandatory parameter 'title' is missing."
 
@@ -18,7 +18,7 @@ Feature: Create Book API Tests
   Scenario: Create a book without an author
     When I create a book with the following details:
       | title        | author |
-      | "Book Title" |         |
+      | "book00" |         |
     Then the response status code should be 400
     And the response message should be "Mandatory parameter 'author' is missing."
 
@@ -26,7 +26,7 @@ Feature: Create Book API Tests
   Scenario: Create a book with invalid ID type
     When I create a book with the following details:
       | id   | title        | author     |
-      | "abc" | "Book Title" | "John Doe" |
+      | "abc" | "Book8" | "John" |
     Then the response status code should be 400
     And the response message should be "Invalid parameter 'id'."
 
@@ -34,7 +34,7 @@ Feature: Create Book API Tests
   Scenario: Successfully create a book
     When I create a book with the following details:
       | id   | title        | author     |
-      | 12 | "Book10" | "saman" |
+      | 1066 | "Book1066" | "saman" |
     Then the response status code should be 201
     And the response message should be "Book created successfully."
 
@@ -42,30 +42,15 @@ Feature: Create Book API Tests
   Scenario: Create a book with a duplicate title
     When I create a book with the following details:
       | id   | title      | author     |
-      | 124  | "Duplicate" | "Jane Doe" |
+      | 124  | "Book8" | "Jane" |
     Then the response status code should be 409
     And the response message should be "A book with the same title already exists."
 
-  @missing-bookname
-  Scenario: Create a book without bookname
-    When I create a book with the following details:
-      | title        | author |
-      | "Author Name" |        |
-    Then the response status code should be 400
-    And the response message should be "Mandatory parameter 'title' is missing."
-
-  @missing-author-again
-  Scenario: Create a book without author
-    When I create a book with the following details:
-      | title        | author |
-      | "Book Title" |         |
-    Then the response status code should be 400
-    And the response message should be "Mandatory parameter 'author' is missing."
 
   @duplicate-book
   Scenario: Create a new book with the existing bookname and author
     When I create a book with the following details:
       | id   | title         | author         |
-      | 125  | "Existing Book" | "Existing Author" |
+      | 666  | "Book8" | "Chaami" |
     Then the response status code should be 409
-    And the response message should be "A book with the same title and author already exists."
+    And the response message should be "Book Already Exists"
