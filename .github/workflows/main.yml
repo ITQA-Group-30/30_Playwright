@@ -1,30 +1,67 @@
-name: Playwright Tests
+name: UI Automation Tests
+
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, development ]
+    paths:
+      - 'UI Testing/**'  # Only trigger on changes to UI Testing directory
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, development ]
+    paths:
+      - 'UI Testing/**'
+  workflow_dispatch:  # Manual trigger
+
 jobs:
-  test:
-    timeout-minutes: 60
+  ui-tests:
+    name: Run UI Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./UI Testing  # Set default working directory
+
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    - name: Install dependencies
-      working-directory: ./UI Testing
-      run: npm ci
-    - name: Install Playwright Browsers
-      working-directory: ./UI Testing
-      run: npx playwright install --with-deps
-      
-    - name: Run Playwright tests
-      run: npx playwright test
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: playwright-report/
-        retention-days: 30
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.5.1'
+          cache: 'npm'
+          cache-dependency-path: './UI Testing/package-lock.json'
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium --with-deps
+        
+      - name: Run Cucumber Tests
+        run: npx cucumber-js
+        env:
+          CI: true
+          
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          npm install -g allure-commandline
+          allure generate allure-results --clean -o allure-report
+          
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ui-test-results
+          path: |
+            ./UI Testing/allure-report/
+            ./UI Testing/test-results/
+          retention-days: 14
+
+      - name: Deploy Report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./UI Testing/allure-report
+          destination_dir: ui-test-report
