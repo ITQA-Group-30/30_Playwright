@@ -1,14 +1,20 @@
-Feature: Retrieve Books by ID
+Feature: Admin Retrieve Book Details by ID
+  As an admin user
+  I want to retrieve book details by ID
+  So that I can view specific book information
 
-  @InvalidID
-  Scenario: Invalid Request with Invalid Book ID
-    Given no book exists in the database with the given id
-    When I send a GET request to "/api/books/{id}" with an invalid id
-    Then the response status for invalid book ID should be 404
-    And the response should indicate that the book was not found
+  Background:
+    Given I am authenticated as admin user
 
-  @UnauthorizedAccess
-  Scenario: Unauthorized Request to Retrieve Book by ID
-    Given the user is not authorized
-    When I send a GET request to "/api/books/{id}" with an invalid authorization token
-    Then the response status for unauthorized access should be 401
+  @getBookById_Admin_Negative
+  Scenario: Admin Request with Negative Book ID
+    When the admin sends a GET request with negative book id "-1"
+    Then the admin response status code should be 404
+    And the error message should be "Invalid | Empty Input Parameters in the Request"
+
+  @getBookById_Admin_Valid
+  Scenario: Admin Request with Valid Book ID
+    Given a book exists in the database
+    When the admin sends a GET request to fetch the book
+    Then the admin response status code should be 200
+    And the admin response should contain correct book details for the given id
