@@ -4,152 +4,120 @@ const fs = require('fs').promises;
 const path = require('path');
 const CONFIG = require('../../src/utils/config');
 
-// Store global variables
+// Global variables for browser and authentication context
 let browser;
-let authContext;
 
-// Configuration object for easier maintenance
 const config = {
     baseURL: CONFIG.BASE_URL,
     authFile: path.join(process.cwd(), 'auth.json'),
     credentials: {
         username: CONFIG.CREDENTIALS.ADMIN.USERNAME,
-        password: CONFIG.CREDENTIALS.ADMIN.PASSWORD
+        password: CONFIG.CREDENTIALS.ADMIN.PASSWORD,
     },
-    timeout: 30000
+    timeout: 30000,
 };
 
-// Determine if running in CI environment
-const isCI = process.env.CI === 'true';
-
-BeforeAll(async function() {
-    // Launch browser with environment-specific configurations
-    browser = await chromium.launch({
-        headless: isCI ? true : false,  // Force headless in CI
-        slowMo: isCI ? 0 : 1000,        // Disable slowMo in CI
-        args: [
-            '--start-maximized',
-            '--no-sandbox',              // Required for CI
-            '--disable-setuid-sandbox',  // Required for CI
-            '--disable-gpu'              // Optional: Better CI compatibility
-        ]
-    });
-});
-
-AfterAll(async function() {
-    // Ensure browser cleanup
-    if (browser) {
-        await browser.close();
-        browser = null;
-    }
-    // Clean up auth file
-    try {
-        await fs.unlink(config.authFile);
-    } catch (error) {
-        // Ignore if file doesn't exist
-    }
-});
-
-// Helper function to perform initial login and save authentication state
+// Helper function to perform login and save auth state
 async function performLogin(context, page) {
     try {
         await page.goto(config.baseURL + 'auth/login');
         await page.waitForLoadState('networkidle');
 
-        // Login with credentials
+        // Enter credentials and submit the login form
         await page.getByPlaceholder('Username').fill(config.credentials.username);
         await page.getByPlaceholder('Password').fill(config.credentials.password);
-
-        // Add extra wait for CI environment
-        if (isCI) {
-            await page.waitForTimeout(1000);
-        }
-
         await page.getByRole('button', { name: 'Login' }).click();
 
-        // Wait for successful login with more robust check
-        await Promise.race([
-            page.waitForURL('**/dashboard/index', { timeout: config.timeout }),
-            page.waitForSelector('[class*="dashboard"]', { timeout: config.timeout })
-        ]);
+        // Ensure successful navigation to the dashboard
+        await page.waitForURL('**/dashboard/index', { timeout: config.timeout });
 
-        // Store authentication state for reuse
+        // Save authentication state
         await context.storageState({ path: config.authFile });
     } catch (error) {
-        console.error('Login failed:', error);
-        throw new Error(`Login failed: ${error.message}`);
+        console.error('Error during login:', error);
+        throw error;
     }
 }
 
-Before({ timeout: config.timeout }, async function() {
+BeforeAll(async function () {
     try {
-        // Configure context with viewport and other settings
-        const contextOptions = {
-            viewport: { width: 1920, height: 1080 },
-            ignoreHTTPSErrors: true
-        };
-
-        // Add stored auth state if available
-        try {
-            await fs.access(config.authFile);
-            contextOptions.storageState = config.authFile;
-        } catch (error) {
-            // File doesn't exist, will need to login
-        }
-
-        // Create new context with options
-        this.context = await browser.newContext(contextOptions);
-        this.page = await this.context.newPage();
-        this.baseURL = config.baseURL;
-
-        // Setup error handling
-        this.page.on('console', msg => {
-            if (msg.type() === 'error') {
-                console.error('Page error:', msg.text());
-            }
+        // Launch browser with required configurations
+        console.log('Launching browser...');
+        browser = await chromium.launch({
+            headless: false,
+            slowMo: 1000,
+            args: ['--start-maximized'],
         });
-
-        // If we don't have stored auth state, perform login
-        if (!contextOptions.storageState) {
-            await performLogin(this.context, this.page);
-        } else {
-            // Verify the session is still valid
-            await this.page.goto(config.baseURL + 'dashboard/index');
-
-            // Wait briefly for page load
-            await this.page.waitForTimeout(1000);
-
-            // If redirected to login, perform login again
-            if (this.page.url().includes('auth/login')) {
-                await performLogin(this.context, this.page);
-            }
-        }
-
+        console.log('Browser launched successfully.');
     } catch (error) {
-        console.error('Setup failed:', error);
-        // Take screenshot on failure
-        if (this.page) {
-            const screenshot = await this.page.screenshot({
-                path: `./test-results/setup-error-${Date.now()}.png`,
-                fullPage: true
-            });
-        }
+        console.error('Error during browser launch:', error);
         throw error;
     }
 });
 
-After(async function() {
-    // Take screenshot on test failure
-    if (this.testCase.result.status === 'FAILED' && this.page) {
-        await this.page.screenshot({
-            path: `./test-results/failure-${this.testCase.pickle.name}-${Date.now()}.png`,
-            fullPage: true
-        });
+AfterAll(async function () {
+    try {
+        // Ensure the browser is closed properly
+        if (browser) {
+            console.log('Closing browser...');
+            await browser.close();
+            console.log('Browser closed successfully.');
+        }
+    } catch (error) {
+        console.error('Error during browser cleanup:', error);
     }
+});
 
-    // Clean up resources
-    if (this.context) {
-        await this.context.close();
+// Runs before each scenario
+Before({ timeout: config.timeout }, async function () {
+    try {
+        console.log('Setting up test context...');
+
+        let contextOptions = {};
+        try {
+            // Check if auth state exists
+            await fs.access(config.authFile);
+            contextOptions.storageState = config.authFile;
+        } catch {
+            console.log('Auth state not found; login required.');
+        }
+
+        // Create a new browser context
+        this.context = await browser.newContext(contextOptions);
+        this.page = await this.context.newPage();
+        this.baseURL = config.baseURL;
+
+        // Perform login if auth state is not available
+        if (!contextOptions.storageState) {
+            await performLogin(this.context, this.page);
+        } else {
+            // Verify session validity
+            await this.page.goto(config.baseURL + 'dashboard/index');
+            if (this.page.url().includes('auth/login')) {
+                console.log('Session expired; re-logging...');
+                await performLogin(this.context, this.page);
+            }
+        }
+
+        console.log('Test context setup complete.');
+    } catch (error) {
+        console.error('Error during test setup:', error);
+        throw error;
+    }
+});
+
+// Runs after each scenario
+After(async function () {
+    try {
+        if (this.context) {
+            console.log('Closing context...');
+            await this.context.close();
+            console.log('Context closed successfully.');
+        }
+    } catch (error) {
+        console.error('Error during context cleanup:', error);
+    } finally {
         this.context = null;
+        this.page = null;
     }
 });
