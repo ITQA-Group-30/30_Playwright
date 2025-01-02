@@ -5,5 +5,5 @@ Feature: Admin User Management
 
   Scenario: Search for system users
     Given I am on the admin page
-    When I search for user "Admin"
+    When I search for user "Shehan Владилен"
     Then I should see user records in the results

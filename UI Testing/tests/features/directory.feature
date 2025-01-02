@@ -5,5 +5,5 @@ Feature: Employee Directory
 
   Scenario: Search for employees in directory
     Given I am on the directory page
-    When I search for employee "John"
+    When I search for employee "John  Doe"
     Then I should see employee cards in the results

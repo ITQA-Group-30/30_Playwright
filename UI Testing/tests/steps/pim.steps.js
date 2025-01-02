@@ -9,7 +9,7 @@ Given('I am on the PIM page', async function() {
     this.pimPage = pimPage;
 });
 
-When('I search for employee {string}', async function(name) {
+When('I search for a employee {string}', async function(name) {
     await this.pimPage.searchEmployee(name);
 });
 
