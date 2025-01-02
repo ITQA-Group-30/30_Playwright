@@ -16,47 +16,57 @@ Given('I am logged in with valid credentials', async function () {
         console.error(`Error during login: ${error.message}`);
         throw error;
     }
-})
+});
 
 When('I create a book with the following details:', async function (dataTable) {
+    const rows = dataTable.rawTable;
+    const headers = rows[0];
+    const values = rows[1];
 
-    const rows = dataTable.rawTable;  // Get the raw table as a 2D array
-    const headers = rows[0];  // The first row contains the column names
-    const values = rows[1];   // The second row contains the values
-
-    const bookDetails = {};  // Initialize an empty object to store key-value pairs
-
-    // Loop through the headers and assign values
+    const bookDetails = {};
     headers.forEach((header, index) => {
-        bookDetails[header] = values[index];  // Map headers to their corresponding values
+        if (values[index] !== '') {
+            bookDetails[header] = values[index];
+        }
     });
 
     try {
-        // Pass the constructed book details to the API method
         response = await bookAPI.createBook(bookDetails);
     } catch (error) {
-        console.error(`Error during book creation: ${error.message}`);
-        throw error;
+        if (error.response) {
+            response = error.response; // Capture error response
+        } else {
+            console.error(`Unexpected error: ${error.message}`);
+            throw error;
+        }
     }
 });
 
-
-Then('the response status code should be {int}', async function (statusCode) {
-    expect(response.status).toBe(statusCode);
+Then('the response status code {int}', async function (statusCode) {
+    if (!response) {
+        throw new Error('No response received from API');
+    }
+    expect(response.status).toBe(statusCode); // Access status as a property
 });
 
-Then('the response message should be {string}', async function (message) {
-    const responseBody = await response.json();
+
+Then('the response message {string}', async function (message) {
+    if (!response) {
+        throw new Error('No response received from API');
+    }
+    const responseBody = await response.json();  // Await if necessary
     expect(responseBody.message).toBe(message);
 });
-
-
 
 When('I create a new book with the existing bookname and author', async function () {
     try {
         response = await bookAPI.createBook({ title: "Existing Book", author: "Existing Author" });
     } catch (error) {
-        console.error(`Error during book creation: ${error.message}`);
-        throw error;
+        if (error.response) {
+            response = error.response; // Capture error response
+        } else {
+            console.error(`Unexpected error: ${error.message}`);
+            throw error;
+        }
     }
 });
