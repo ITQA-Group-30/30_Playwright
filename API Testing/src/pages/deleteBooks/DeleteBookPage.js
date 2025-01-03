@@ -18,7 +18,7 @@ class DeleteBookPage {
         console.log(
           "Initializing without credentials (unauthenticated requests)."
         );
-        this.context = null; // No auth context for unauthenticated requests
+        this.context = null;
       }
     } catch (error) {
       console.error("Error initializing BookAPI:", error);
