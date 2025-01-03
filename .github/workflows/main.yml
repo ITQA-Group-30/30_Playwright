@@ -82,7 +82,7 @@ jobs:
         if: always()
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           publish_dir: ./UI Testing/allure-report
           enable_jekyll: false
           user_name: 'github-actions[bot]'
