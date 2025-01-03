@@ -23,11 +23,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  combined-tests:
-    name: Run Tests
+  ui-tests:
+    name: Run UI Tests
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./UI Testing
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -37,86 +42,136 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set JAVA_HOME
-        run: |
-          echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
-          echo "JAVA_HOME is set to: $JAVA_HOME"
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.5.1'
           cache: 'npm'
+          cache-dependency-path: './UI Testing/package-lock.json'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install chromium --with-deps
 
       - name: Setup Display
         run: |
           sudo apt-get install -y xvfb
           echo "DISPLAY=:99" >> $GITHUB_ENV
 
-      # UI Tests
-      - name: Install UI Dependencies
-        working-directory: ./UI Testing
-        run: npm ci
-
-      - name: Install Playwright
-        working-directory: ./UI Testing
-        run: npx playwright install chromium --with-deps
-
-      - name: Run UI Tests
-        working-directory: ./UI Testing
+      - name: Run Cucumber Tests
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npx cucumber-js --retry 1
         env:
           CI: true
           PLAYWRIGHT_HEADLESS: true
-        continue-on-error: true
+          DEBUG: pw:api
 
-      # API Tests
-      - name: Setup API Server
-        working-directory: ./API Testing
-        run: |
-          mkdir -p server
-          wget --output-document=server/demo-0.0.1-SNAPSHOT.jar "https://firebasestorage.googleapis.com/v0/b/flashmart-c51b3.appspot.com/o/demo-0.0.1-SNAPSHOT.jar?alt=media&token=df7721d4-e5fd-416a-9a26-a550bf1d0a53"
-          nohup java -jar server/demo-0.0.1-SNAPSHOT.jar > server.log 2>&1 &
-          until curl --silent --head http://localhost:7081/api/books; do
-            sleep 2
-          done
-
-      - name: Install API Dependencies
-        working-directory: ./API Testing
-        run: npm ci
-
-      - name: Run API Tests
-        working-directory: ./API Testing
-        run: npx cucumber-js --format json:allure-results/results.json
-        continue-on-error: true
-
-      # Combined Reports
-      - name: Generate Combined Report
+      - name: Generate Allure Report
         if: always()
         run: |
           npm install -g allure-commandline
-          mkdir -p combined-results
-          cp -r ./UI\ Testing/allure-results/* combined-results/ || true
-          cp -r ./API\ Testing/allure-results/* combined-results/ || true
-          allure generate combined-results --clean -o allure-report
+          allure generate allure-results --clean -o allure-report
 
-      - name: Deploy to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          publish_dir: allure-report
-          enable_jekyll: false
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Upload Artifacts
+      - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: test-reports
-          path: |
-            allure-report
-            */server.log
+          name: ui-test-report
+          path: ./UI Testing/allure-report
           retention-days: 14
+
+  api-tests:
+    name: Run API Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./API Testing
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Create Server Directory
+        run: mkdir -p server
+
+      - name: Download JAR File from Cloud
+        run: |
+          wget --output-document=server/demo-0.0.1-SNAPSHOT.jar "https://firebasestorage.googleapis.com/v0/b/flashmart-c51b3.appspot.com/o/demo-0.0.1-SNAPSHOT.jar?alt=media&token=df7721d4-e5fd-416a-9a26-a550bf1d0a53"
+
+      - name: Start the JAR File
+        run: |
+          nohup java -jar server/demo-0.0.1-SNAPSHOT.jar > server.log 2>&1 &
+          echo "Waiting for the server to start..."
+          until curl --silent --head http://localhost:7081/api/books; do
+            echo "Server not ready yet. Retrying in 2 seconds..."
+            sleep 2
+          done
+          echo "Server is up and running."
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run API Tests
+        run: npx cucumber-js --format json:allure-results/results.json
+
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          npm install -g allure-commandline
+          allure generate allure-results --clean -o allure-report
+
+      - name: Upload API Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-test-report
+          path: ./API Testing/allure-report
+          retention-days: 14
+
+  deploy-reports:
+    name: Deploy Allure Reports
+    runs-on: ubuntu-latest
+    needs: [ui-tests, api-tests]
+    if: always()
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Setup GitHub Pages Directory
+        run: mkdir -p gh-pages/{ui-report,api-report}
+
+      - name: Download UI Report
+        uses: actions/download-artifact@v3
+        with:
+          name: ui-test-report
+          path: ./gh-pages/ui-report
+
+      - name: Download API Report
+        uses: actions/download-artifact@v3
+        with:
+          name: api-test-report
+          path: ./gh-pages/api-report
+
+      - name: Deploy Allure Reports to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          publish_dir: gh-pages
+          enable_jekyll: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy Allure reports to GitHub Pages'
