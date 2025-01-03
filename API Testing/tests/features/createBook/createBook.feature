@@ -43,7 +43,7 @@ Feature: Create Book API Tests
     When I create a book with the following details:
       | id   | title | author |
       | 124  | Book8 | Jane   |
-    Then the response status code 208
+    Then the response status code 201
     And the response message "A book with the same title already exists."
 
   @duplicate-book
