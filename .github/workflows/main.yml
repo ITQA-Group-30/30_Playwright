@@ -118,6 +118,18 @@ jobs:
           wget --output-document=server/demo-0.0.1-SNAPSHOT.jar "https://firebasestorage.googleapis.com/v0/b/flashmart-c51b3.appspot.com/o/demo-0.0.1-SNAPSHOT.jar?alt=media&token=df7721d4-e5fd-416a-9a26-a550bf1d0a53"
         continue-on-error: true
 
+      - name: Set JAVA_HOME Environment Variable
+        run: |
+          echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
+          echo "JAVA_HOME is set to: $JAVA_HOME"
+
+      - name: Download and Extract Allure
+        run: |
+          wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz -O allure-2.32.0.tgz
+          tar -zxvf allure-2.32.0.tgz
+          sudo mv allure-2.32.0 /opt/allure
+          echo "/opt/allure/bin" >> $GITHUB_PATH
+
       - name: Start the JAR File
         run: |
           nohup java -jar server/demo-0.0.1-SNAPSHOT.jar > server.log 2>&1 &
@@ -129,6 +141,13 @@ jobs:
           echo "Server is up and running."
         continue-on-error: true
 
+      - name: Upload Server Log for Debugging
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: server-log
+          path: server.log
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -136,28 +155,33 @@ jobs:
         continue-on-error: true
 
       - name: Install Dependencies
+        working-directory: ./API Testing
         run: npm ci
         continue-on-error: true
 
       - name: Run API Tests
+        working-directory: ./API Testing
         run: npx cucumber-js --format json:allure-results/results.json
         continue-on-error: true
 
       - name: Generate Allure Report
-        if: always()
+        working-directory: ./API Testing
         run: |
           npm install -g allure-commandline
           allure generate allure-results --clean -o allure-report
         continue-on-error: true
 
       - name: Upload API Test Results
-        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: api-test-report
           path: ./API Testing/allure-report
           retention-days: 14
         continue-on-error: true
+
+      - name: Stop the Server
+        run: |
+         pkill -f 'java -jar server/demo-0.0.1-SNAPSHOT.jar'
 
   deploy-reports:
     name: Deploy Allure Reports
