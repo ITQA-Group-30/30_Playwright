@@ -7,28 +7,28 @@ setDefaultTimeout(30 * 1000);
 let updateBookAPI;
 let response;
 
-Given('I am logged in as aa {string} with password {string}', async function(username, password) {
+Given('I am logged in as a admin {string} with password {string}', async function(username, password) {
     updateBookAPI = new UpdateBookAPI();
     await updateBookAPI.init(username, password);
 });
 
 
-When('I try to update a book with valid details', async function(dataTable) {
+When('try to update a book with valid details', async function(dataTable) {
     const data = dataTable.hashes()[0];
     response = await updateBookAPI.updateBook(Number(data.id), data.title, data.author);
 });
 
-When('I try to update a book with invalid ID type', async function(dataTable) {
+When('try to update a book with invalid ID type', async function(dataTable) {
     const data = dataTable.hashes()[0];
     response = await updateBookAPI.updateBook(data.id, data.title, data.author);
 });
 
-When('I try to update a book with empty body', async function(dataTable) {
+When('try to update a book with empty body', async function(dataTable) {
     const data = dataTable.hashes()[0];
     response = await updateBookAPI.updateBookEmptyBody(Number(data.id));
 });
 
-When('I try to update a non-existent book', async function(dataTable) {
+When('try to update a non-existent book', async function(dataTable) {
     const data = dataTable.hashes()[0];
     response = await updateBookAPI.updateBook(Number(data.id), data.title, data.author);
 });
@@ -45,7 +45,7 @@ After(async function() {
     // Cleanup after each scenario if needed
 });
 
-Given('I am logged in as user {string} with password {string}', async function(username, password) {
+Given('logged in as user {string} with password {string}', async function(username, password) {
     updateBookAPI = new UpdateBookAPI();
     await updateBookAPI.init(username, password);
 });
