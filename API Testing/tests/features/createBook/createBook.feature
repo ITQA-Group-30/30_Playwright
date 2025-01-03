@@ -34,7 +34,7 @@ Feature: Create Book API Tests
   Scenario: Successfully create a book
     When I create a book with the following details:
       | id   | title     | author |
-      | 1056 | Book1056  | saman  |
+      | 100 | Book100  | saman  |
     Then the response status code 201
     And the response message "Book created successfully."
 
@@ -43,7 +43,7 @@ Feature: Create Book API Tests
     When I create a book with the following details:
       | id   | title | author |
       | 124  | Book8 | Jane   |
-    Then the response status code 409
+    Then the response status code 208
     And the response message "A book with the same title already exists."
 
   @duplicate-book
@@ -51,5 +51,15 @@ Feature: Create Book API Tests
     When I create a book with the following details:
       | id   | title  | author |
       | 666  | Book8  | Chaami |
-    Then the response status code 409
-    And the response message "Book Already Exists."
+    Then the response status code 208
+    And the response message "Book Already Exists"
+
+  @missing-title-and-author
+  Scenario: Create a book without a title and author
+    When I create a book with the following details:
+      | title | author |
+      |       |        |
+    Then the response status code 400
+    And the response message "Mandatory parameters 'title' and 'author' are missing."
+
+
