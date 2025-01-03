@@ -67,12 +67,12 @@ const LOCATORS = {
         CHECKBOXES: '.oxd-checkbox-wrapper input'
     },
     ADDUSER: {
-        ADD_USER_BUTTON: 'button#btnAdd', // Locator for Add User button
-        USERNAME_INPUT: 'input#systemUser_userName', // Locator for username input
-        PASSWORD_INPUT: 'input#systemUser_password', // Locator for password input
-        CONFIRM_PASSWORD_INPUT: 'input#systemUser_confirmPassword', // Locator for confirm password input
-        SAVE_BUTTON: 'input#btnSave', // Locator for save button
-        SUCCESS_MESSAGE: 'div.success', // Locator for success message
+        ADD_USER_BUTTON: 'button#btnAdd',
+        USERNAME_INPUT: 'input#systemUser_userName',
+        PASSWORD_INPUT: 'input#systemUser_password',
+        CONFIRM_PASSWORD_INPUT: 'input#systemUser_confirmPassword',
+        SAVE_BUTTON: 'input#btnSave',
+        SUCCESS_MESSAGE: 'div.success',
     }
 };
 

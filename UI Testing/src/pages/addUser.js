@@ -1,16 +1,16 @@
-// src/pages/addUser.js
+
 const BasePage = require('./BasePage');
 
 class AddUser extends BasePage {
     constructor(page) {
         super(page); // Call the parent class constructor
         this.locators = this.locators.ADDUSER;
-        this.addUserButton = this.locators.ADD_USER_BUTTON; // Locator for the Add User button
-        this.usernameInput = this.locators.USERNAME_INPUT; // Locator for the username input field
-        this.passwordInput = this.locators.PASSWORD_INPUT; // Locator for the password input field
-        this.confirmPasswordInput = this.locators.CONFIRM_PASSWORD_INPUT; // Locator for the confirm password input field
-        this.saveButton = this.locators.SAVE_BUTTON; // Locator for the Save button
-        this.successMessage = this.locators.SUCCESS_MESSAGE; // Locator for the success message
+        this.addUserButton = this.locators.ADD_USER_BUTTON;
+        this.usernameInput = this.locators.USERNAME_INPUT;
+        this.passwordInput = this.locators.PASSWORD_INPUT;
+        this.confirmPasswordInput = this.locators.CONFIRM_PASSWORD_INPUT;
+        this.saveButton = this.locators.SAVE_BUTTON;
+        this.successMessage = this.locators.SUCCESS_MESSAGE;
     }
 
     async navigateToAddUserPage() {
