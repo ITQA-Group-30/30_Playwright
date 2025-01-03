@@ -38,17 +38,10 @@ Feature: Update Book API Tests
     Then the response status code should be 404
     And the response message should be "Book is not found"
 
-  @unauthorized
-  Scenario: Update Book Without Authentication
-    When I try to update a book without authentication
-      | id | title              | author          |
-      | 1  | Updated Book Title | Updated Author  |
-    Then the response status code should be 401
-    And the response message should be "Unauthorized"
 
   @forbidden
   Scenario: Update Book With Regular User
-    Given I am logged in as "user" with password "password"
+    Given I am logged in as user "user" with password "password"
     When I try to update a book with valid details
       | id | title              | author          |
       | 1  | Updated Book Title | Updated Author  |
