@@ -7,6 +7,7 @@ const {
 } = require("@cucumber/cucumber");
 const { expect } = require("@playwright/test");
 const DeleteBookPage = require("../../../src/pages/deleteBooks/DeleteBookPage");
+const CONFIG = require("../../../src/utils/config");
 
 setDefaultTimeout(30 * 1000);
 
@@ -15,12 +16,12 @@ let response;
 
 Given("I am logged in as an authorized admin user", async function () {
   deleteBookPage = new DeleteBookPage();
-  await deleteBookPage.init("admin", "adminpassword");
+  await deleteBookPage.init(CONFIG.username, CONFIG.password);
 });
 
 Given("I am logged in as an unauthorized user", async function () {
   deleteBookPageI = new DeleteBookPage();
-  await deleteBookPageI.init("user", "password");
+  await deleteBookPageI.init(CONFIG.username, CONFIG.password);
 });
 
 Given("I am not logged in", async function () {
@@ -37,7 +38,7 @@ When("I delete the book with ID {string}", async function (bookId) {
 });
 
 When("I try to delete a book without authentication", async function () {
-  response = await deleteBookPage.deleteBookWithoutAuth(1); // Pass a test book ID
+  response = await deleteBookPage.deleteBookWithoutAuth(); // Pass a test book ID
 });
 
 Then(

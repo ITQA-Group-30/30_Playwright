@@ -1,32 +1,44 @@
-// File: src/pages/deleteBooks/DeleteBookPage.js
 const { request } = require("@playwright/test");
-
-const config = require("../../../src/utils/config");
+const Authentication = require("../../Authentication/Authentication");
+const CONFIG = require("../../../src/utils/config");
 
 class DeleteBookPage {
-  constructor(baseURL = config.baseURL) {
-    // Use baseURL from config.js
-    this.baseURL = `${baseURL}/api/books`;
+  constructor() {
     this.context = null;
+    this.baseURL = `${CONFIG.baseURL}/api/books`;
+    this.auth = new Authentication();
   }
 
-  // Initialize API context with optional credentials
-  async init(username = config.username, password = config.password) {
-    if (this.context) {
-      await this.context.dispose(); // Clear old context to avoid resource leaks
+  async init() {
+    try {
+      await this.waitForBackendService();
+      this.context = await this.auth.init(CONFIG.username, CONFIG.password);
+    } catch (error) {
+      console.error("Error initializing BookAPI:", error);
+      throw new Error("Failed to initialize BookAPI");
     }
-    this.context = await request.newContext({
-      baseURL: this.baseURL,
-      extraHTTPHeaders: {
-        Authorization:
-          username && password
-            ? `Basic ${Buffer.from(`${username}:${password}`).toString(
-                "base64"
-              )}`
-            : undefined,
-        "Content-Type": "application/json",
-      },
-    });
+  }
+
+  async waitForBackendService(maxRetries = 5, interval = 2000) {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const response = await fetch(this.baseURL);
+        if (response.status === 401) {
+          // Service is up but requires auth
+          return true;
+        }
+      } catch (error) {
+        console.log(
+          `Waiting for backend service... Attempt ${i + 1}/${maxRetries}`
+        );
+        if (i === maxRetries - 1) {
+          throw new Error(
+            "Backend service not available. Please ensure the JAR file is running."
+          );
+        }
+        await new Promise((resolve) => setTimeout(resolve, interval));
+      }
+    }
   }
 
   // Delete a book by ID
@@ -41,8 +53,10 @@ class DeleteBookPage {
         body: { message: "Invalid parameter 'id'." },
       };
     }
+    const deleteURL = `${this.baseURL}/${bookId}`;
     try {
-      const response = await this.context.delete(`/${bookId}`);
+      console.log(`Sending DELETE request to: ${deleteURL}`);
+      const response = await this.context.delete(deleteURL);
       const body = await response
         .json()
         .catch(() => ({ error: "Invalid JSON" }));
