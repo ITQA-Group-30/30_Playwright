@@ -16,7 +16,12 @@ const CONFIG = {
         PIM: 'pim/viewEmployeeList',
         LEAVE: 'leave/viewLeaveList',
         MY_INFO: 'pim/viewPersonalDetails',
-        DIRECTORY: 'directory/viewDirectory'
+        DIRECTORY: 'directory/viewDirectory',
+        BUZZ: 'buzz/viewBuzz',
+        CLAIM: 'claim/viewAssignClaim',
+        TIMESHEET: 'time/viewEmployeeTimesheet',
+        PERFORMANCE: 'performance/searchEvaluatePerformanceReview',
+        DASHBOARD: 'dashboard/index'
     }
 };
 
