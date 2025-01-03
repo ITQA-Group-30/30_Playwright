@@ -1,4 +1,4 @@
-// tests/support/world.js
+
 const { setWorldConstructor } = require('@cucumber/cucumber');
 const { request } = require('@playwright/test');
 
