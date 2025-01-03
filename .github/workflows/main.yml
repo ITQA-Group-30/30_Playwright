@@ -1,4 +1,4 @@
-name: UI Automation Tests
+name: Automated Testing Suite
 
 permissions:
   contents: write
@@ -14,10 +14,12 @@ on:
     branches: [main, master, development]
     paths:
       - 'UI Testing/**'
+      - 'API Testing/**'
   pull_request:
     branches: [main, master, development]
     paths:
       - 'UI Testing/**'
+      - 'API Testing/**'
   workflow_dispatch:
 
 jobs:
@@ -33,6 +35,17 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set JAVA_HOME Environment Variable
+        run: |
+          echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
+          echo "JAVA_HOME is set to: $JAVA_HOME"
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -75,21 +88,163 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v3
         with:
-          name: ui-test-results
-          path: |
-            ./UI Testing/allure-report/
-            ./UI Testing/test-results/
+          name: ui-test-report
+          path: ./UI Testing/allure-report
           retention-days: 14
         continue-on-error: true
 
-      - name: Deploy Report to GitHub Pages
+  api-tests:
+    name: Run API Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./API Testing
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set JAVA_HOME Environment Variable
+        run: |
+          echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
+          echo "JAVA_HOME is set to: $JAVA_HOME"
+
+      - name: Create Server Directory
+        run: mkdir -p server
+        continue-on-error: true
+
+      - name: Download JAR File from Cloud
+        run: |
+          wget --output-document=server/demo-0.0.1-SNAPSHOT.jar "https://firebasestorage.googleapis.com/v0/b/flashmart-c51b3.appspot.com/o/demo-0.0.1-SNAPSHOT.jar?alt=media&token=df7721d4-e5fd-416a-9a26-a550bf1d0a53"
+        continue-on-error: true
+
+      - name: Start the JAR File
+        run: |
+          nohup java -jar server/demo-0.0.1-SNAPSHOT.jar > server.log 2>&1 &
+          echo "Waiting for the server to start..."
+          until curl --silent --head http://localhost:7081/api/books; do
+            echo "Server not ready yet. Retrying in 2 seconds..."
+            sleep 2
+          done
+          echo "Server is up and running."
+        continue-on-error: true
+
+      - name: Upload Server Log for Debugging
         if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: server-log
+          path: server.log
+        continue-on-error: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm ci
+        continue-on-error: true
+
+      - name: Run API Tests
+        run: npx cucumber-js --format json:allure-results/results.json
+        continue-on-error: true
+
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          npm install -g allure-commandline
+          allure generate allure-results --clean -o allure-report
+        continue-on-error: true
+
+      - name: Upload API Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-test-report
+          path: ./API Testing/allure-report
+          retention-days: 14
+        continue-on-error: true
+
+      - name: Stop the Server
+        if: always()
+        run: |
+          pkill -f 'java -jar server/demo-0.0.1-SNAPSHOT.jar'
+        continue-on-error: true
+
+  clear-gh-pages:
+    name: Clear GitHub Pages
+    runs-on: ubuntu-latest
+    needs:
+      - ui-tests
+      - api-tests
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Create Empty Directory
+        run: mkdir empty-dir
+
+      - name: Clear GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: empty-dir
+          keep_files: false
+        continue-on-error: true
+
+  deploy-ui-report:
+    name: Deploy UI Allure Report
+    runs-on: ubuntu-latest
+    needs: [ui-tests, clear-gh-pages]
+    if: always()
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Download UI Report
+        uses: actions/download-artifact@v3
+        with:
+          name: ui-test-report
+          path: ./UI Testing/allure-report
+
+      - name: Deploy UI Report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           publish_dir: ./UI Testing/allure-report
-          enable_jekyll: false
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'Deploy Allure report to GitHub Pages'
+          destination_dir: ui-report
+          keep_files: false
+        continue-on-error: true
+
+  deploy-api-report:
+    name: Deploy API Allure Report
+    runs-on: ubuntu-latest
+    needs: [api-tests, deploy-ui-report]
+    if: always()
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Download API Report
+        uses: actions/download-artifact@v3
+        with:
+          name: api-test-report
+          path: ./API Testing/allure-report
+
+      - name: Deploy API Report to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          publish_dir: ./API Testing/allure-report
+          destination_dir: api-report
+          keep_files: true
         continue-on-error: true
