@@ -224,7 +224,7 @@ jobs:
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy Allure report to GitHub Pages'
-        continue-on-error: truee
+        continue-on-error: true
 
   deploy-api-report:
     name: Deploy API Allure Report
