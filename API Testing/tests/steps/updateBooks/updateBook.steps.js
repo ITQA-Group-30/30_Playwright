@@ -12,6 +12,7 @@ Given('I am logged in as aa {string} with password {string}', async function(use
     await updateBookAPI.init(username, password);
 });
 
+
 When('I try to update a book with valid details', async function(dataTable) {
     const data = dataTable.hashes()[0];
     response = await updateBookAPI.updateBook(Number(data.id), data.title, data.author);
@@ -32,11 +33,6 @@ When('I try to update a non-existent book', async function(dataTable) {
     response = await updateBookAPI.updateBook(Number(data.id), data.title, data.author);
 });
 
-When('I try to update a book without authentication', async function(dataTable) {
-    const data = dataTable.hashes()[0];
-    response = await updateBookAPI.updateBookWithoutAuth(Number(data.id), data.title, data.author);
-});
-
 Then('the response status code should be aa {int}', async function(expectedStatus) {
     expect(response.status).toBe(expectedStatus);
 });
@@ -47,4 +43,9 @@ Then('the response message should be aa {string}', async function(expectedMessag
 
 After(async function() {
     // Cleanup after each scenario if needed
+});
+
+Given('I am logged in as user {string} with password {string}', async function(username, password) {
+    updateBookAPI = new UpdateBookAPI();
+    await updateBookAPI.init(username, password);
 });

@@ -43,7 +43,7 @@ When("I try to delete a book without authentication", async function () {
 Then(
   "the response status code should be {int}",
   async function (expectedStatus) {
-    expect(response.status).toBe(expectedStatus);
+    expect(response).toBe(expectedStatus);
   }
 );
 
