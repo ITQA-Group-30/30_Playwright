@@ -41,7 +41,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-        continue-on-error: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -49,22 +48,18 @@ jobs:
           node-version: '20.5.1'
           cache: 'npm'
           cache-dependency-path: './UI Testing/package-lock.json'
-        continue-on-error: true
 
       - name: Install Dependencies
         run: npm ci
-        continue-on-error: true
 
       - name: Install Playwright Browsers
         run: npx playwright install chromium --with-deps
-        continue-on-error: true
 
       - name: Setup Display
         run: |
           sudo apt-get install -y xvfb
           echo "DISPLAY=:99" >> $GITHUB_ENV
-        continue-on-error: true
-
+      
       - name: Run Cucumber Tests
         run: |
           xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npx cucumber-js --retry 1
@@ -72,14 +67,12 @@ jobs:
           CI: true
           PLAYWRIGHT_HEADLESS: true
           DEBUG: pw:api
-        continue-on-error: true
 
       - name: Generate Allure Report
         if: always()
         run: |
           npm install -g allure-commandline
           allure generate allure-results --clean -o allure-report
-        continue-on-error: true
 
       - name: Upload Test Results
         if: always()
@@ -88,7 +81,6 @@ jobs:
           name: ui-test-report
           path: ./UI Testing/allure-report
           retention-days: 14
-        continue-on-error: true
 
   api-tests:
     name: Run API Tests
@@ -100,35 +92,19 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-        continue-on-error: true
 
       - name: Install Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
-        continue-on-error: true
 
       - name: Create Server Directory
         run: mkdir -p server
-        continue-on-error: true
 
       - name: Download JAR File from Cloud
         run: |
           wget --output-document=server/demo-0.0.1-SNAPSHOT.jar "https://firebasestorage.googleapis.com/v0/b/flashmart-c51b3.appspot.com/o/demo-0.0.1-SNAPSHOT.jar?alt=media&token=df7721d4-e5fd-416a-9a26-a550bf1d0a53"
-        continue-on-error: true
-
-      - name: Set JAVA_HOME Environment Variable
-        run: |
-          echo "JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))" >> $GITHUB_ENV
-          echo "JAVA_HOME is set to: $JAVA_HOME"
-
-      - name: Download and Extract Allure
-        run: |
-          wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz -O allure-2.32.0.tgz
-          tar -zxvf allure-2.32.0.tgz
-          sudo mv allure-2.32.0 /opt/allure
-          echo "/opt/allure/bin" >> $GITHUB_PATH
 
       - name: Start the JAR File
         run: |
@@ -139,49 +115,31 @@ jobs:
             sleep 2
           done
           echo "Server is up and running."
-        continue-on-error: true
-
-      - name: Upload Server Log for Debugging
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: server-log
-          path: server.log
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-        continue-on-error: true
 
       - name: Install Dependencies
-        working-directory: ./API Testing
         run: npm ci
-        continue-on-error: true
 
       - name: Run API Tests
-        working-directory: ./API Testing
         run: npx cucumber-js --format json:allure-results/results.json
-        continue-on-error: true
 
       - name: Generate Allure Report
-        working-directory: ./API Testing
+        if: always()
         run: |
           npm install -g allure-commandline
           allure generate allure-results --clean -o allure-report
-        continue-on-error: true
 
       - name: Upload API Test Results
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: api-test-report
           path: ./API Testing/allure-report
           retention-days: 14
-        continue-on-error: true
-
-      - name: Stop the Server
-        run: |
-         pkill -f 'java -jar server/demo-0.0.1-SNAPSHOT.jar'
 
   deploy-reports:
     name: Deploy Allure Reports
@@ -192,33 +150,28 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-        continue-on-error: true
 
-      - name: Setup GitHub Pages Directory
-        run: mkdir -p gh-pages/{ui-report,api-report}
-        continue-on-error: true
+      - name: Create Report Directory
+        run: mkdir -p 30_Playwright/{ui-report,api-report}
 
       - name: Download UI Report
         uses: actions/download-artifact@v3
         with:
           name: ui-test-report
-          path: ./gh-pages/ui-report
-        continue-on-error: true
+          path: ./30_Playwright/ui-report
 
       - name: Download API Report
         uses: actions/download-artifact@v3
         with:
           name: api-test-report
-          path: ./gh-pages/api-report
-        continue-on-error: true
+          path: ./30_Playwright/api-report
 
       - name: Deploy Allure Reports to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          publish_dir: gh-pages
+          publish_dir: 30_Playwright
           enable_jekyll: false
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy Allure reports to GitHub Pages'
-        continue-on-error: true
