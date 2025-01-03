@@ -65,6 +65,14 @@ const LOCATORS = {
         TABLE_HEADER: '.oxd-table-header',
         TABLE_ROWS: '.oxd-table-card',
         CHECKBOXES: '.oxd-checkbox-wrapper input'
+    },
+    ADDUSER: {
+        ADD_USER_BUTTON: 'button#btnAdd',
+        USERNAME_INPUT: 'input#systemUser_userName',
+        PASSWORD_INPUT: 'input#systemUser_password',
+        CONFIRM_PASSWORD_INPUT: 'input#systemUser_confirmPassword',
+        SAVE_BUTTON: 'input#btnSave',
+        SUCCESS_MESSAGE: 'div.success',
     }
 };
 

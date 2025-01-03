@@ -15,3 +15,9 @@ Feature: Retrieve Books from the Library
     When I send a GET request to
     Then the response status code should be 200
     And the response should contain an empty array
+
+  Scenario: Unauthorized Request
+    Given I am logged in with an invalid "user" with password "wrongPassword"
+    When I send a GET request to
+    Then the response status code should be 401
+    And the response should indicate an unauthorized access

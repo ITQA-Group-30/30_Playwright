@@ -1,4 +1,4 @@
-// src/pages/BasePage.js
+
 const LOCATORS = require('../utils/locators');
 const CONFIG = require('../utils/config');
 const Helper = require('../utils/helper');

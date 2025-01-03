@@ -4,68 +4,62 @@ Feature: Create Book API Tests
   So that I can ensure it handles various scenarios correctly
 
   Background:
-    Given I am logged in as "admin" with password "password"
+    Given I am logged in with valid credentials
 
   @missing-title
   Scenario: Create a book without a title
     When I create a book with the following details:
-      | title   | author    |
-      |         | "John Doe" |
-    Then the response status code should be 400
-    And the response message should be "Mandatory parameter 'title' is missing."
+      | title | author |
+      |       | cha    |
+    Then the response status code 400
+    And the response message "Mandatory parameter 'title' is missing."
 
   @missing-author
   Scenario: Create a book without an author
     When I create a book with the following details:
-      | title        | author |
-      | "Book Title" |         |
-    Then the response status code should be 400
-    And the response message should be "Mandatory parameter 'author' is missing."
+      | title   | author |
+      | book00  |        |
+    Then the response status code 400
+    And the response message "Mandatory parameter 'author' is missing."
 
   @invalid-id
   Scenario: Create a book with invalid ID type
     When I create a book with the following details:
-      | id   | title        | author     |
-      | "abc" | "Book Title" | "John Doe" |
-    Then the response status code should be 400
-    And the response message should be "Invalid parameter 'id'."
+      | id   | title  | author |
+      | abc  | Book8  | John   |
+    Then the response status code 400
+    And the response message "Invalid parameter 'id'."
 
   @valid-request
   Scenario: Successfully create a book
     When I create a book with the following details:
-      | id   | title        | author     |
-      | 12 | "Book10" | "saman" |
-    Then the response status code should be 201
-    And the response message should be "Book created successfully."
+      | id   | title     | author |
+      | 100 | Book100  | saman  |
+    Then the response status code 201
+    And the response message "Book created successfully."
 
   @duplicate-title
   Scenario: Create a book with a duplicate title
     When I create a book with the following details:
-      | id   | title      | author     |
-      | 124  | "Duplicate" | "Jane Doe" |
-    Then the response status code should be 409
-    And the response message should be "A book with the same title already exists."
-
-  @missing-bookname
-  Scenario: Create a book without bookname
-    When I create a book with the following details:
-      | title        | author |
-      | "Author Name" |        |
-    Then the response status code should be 400
-    And the response message should be "Mandatory parameter 'title' is missing."
-
-  @missing-author-again
-  Scenario: Create a book without author
-    When I create a book with the following details:
-      | title        | author |
-      | "Book Title" |         |
-    Then the response status code should be 400
-    And the response message should be "Mandatory parameter 'author' is missing."
+      | id   | title | author |
+      | 124  | Book8 | Jane   |
+    Then the response status code 208
+    And the response message "A book with the same title already exists."
 
   @duplicate-book
   Scenario: Create a new book with the existing bookname and author
     When I create a book with the following details:
-      | id   | title         | author         |
-      | 125  | "Existing Book" | "Existing Author" |
-    Then the response status code should be 409
-    And the response message should be "A book with the same title and author already exists."
+      | id   | title  | author |
+      | 666  | Book8  | Chaami |
+    Then the response status code 208
+    And the response message "Book Already Exists"
+
+  @missing-title-and-author
+  Scenario: Create a book without a title and author
+    When I create a book with the following details:
+      | title | author |
+      |       |        |
+    Then the response status code 400
+    And the response message "Mandatory parameters 'title' and 'author' are missing."
+
+
