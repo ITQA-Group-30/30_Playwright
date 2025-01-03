@@ -1,49 +1,50 @@
-
 const { Given, When, Then, setDefaultTimeout } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
-const BookAPI = require('../../../src/pages/getBooks/getBookById_User');
+const { BooksAPI } = require('../../../src/pages/getBooks/GetAllBooks');
 
 setDefaultTimeout(30 * 1000);
 
 let bookAPI;
 let response;
 let bookId;
-let createdBook;
 
-Given('I am authenticated as admin user a', async function () {
-    bookAPI = new BookAPI();
-    await bookAPI.init('admin', 'password');
+Given('a book exists in the database with a valid id', async function () {
+    bookAPI = new BooksAPI();
+    await bookAPI.init();
+
+    const book = { title: 'User Book', author: 'User Author', price: 15.99 };
+    response = await bookAPI.createBook(book, 'user:password');
+    expect(response.status()).toBe(201);
+
+    const createdBook = await response.json();
+    bookId = createdBook.id;
 });
 
-Given('a book exists in the database', async function () {
-    // Create a sample book for testing
-    createdBook = await bookAPI.createBook({
-        title: 'Admin Sample Book',
-        author: 'Admin Author'
-    });
-    bookId = createdBook.body.id;
+When('a user sends a GET request to {int}', async function (id) {
+    response = await bookAPI.getBookById(bookId, 'user:password');
 });
 
-When('the admin sends a GET request to fetch the book a', async function () {
-    response = await bookAPI.getBookById(bookId);
+Then('the response status code should be {int}', async function (expectedStatus) {
+    expect(response.status()).toBe(expectedStatus);
 });
 
-When('the admin sends a GET request with negative book id a {string}', async function (id) {
-    response = await bookAPI.getBookById(parseInt(id));
-});
-
-Then('the admin response status code should be a {int}', async function (expectedStatus) {
-    expect(response.status).toBe(expectedStatus);
-});
-
-Then('the admin response should contain correct book details for the given id a', async function () {
-    const book = response.body;
+Then('the response should contain the correct book details for the given id', async function () {
+    const book = await response.json();
     expect(book.id).toBe(bookId);
-    expect(book.title).toBe('Admin Sample Book');
-    expect(book.author).toBe('Admin Author');
+    expect(book.title).toBe('User Book');
+    expect(book.author).toBe('User Author');
 });
 
-Then('the error message should be a {string}', async function (expectedMessage) {
-    expect(response.body.message).toBe(expectedMessage);
+Given('the user is not authorized', async function () {
+    bookAPI = new BooksAPI();
+    await bookAPI.init();
 });
 
+When('a user sends a GET request to {int} with an invalid token', async function () {
+    response = await bookAPI.getBookById(bookId, 'invalid-token');
+});
+
+Then('the response should indicate unauthorized access', async function () {
+    const responseBody = await response.json();
+    expect(responseBody.error).toBe('Unauthorized');
+});
