@@ -10,4 +10,4 @@ Feature: Admin Retrieve Book Details by ID
   Scenario: Admin Request with Negative Book ID
     When the admin sends a GET request with negative book id "-1"
     Then the admin response status code should be 404
-    And the error message should be "Invalid | Empty Input Parameters in the Request"
+    And the error message should be "Book is not found"
