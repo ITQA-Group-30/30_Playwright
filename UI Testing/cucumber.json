@@ -14,7 +14,8 @@
             "tests/steps/*.steps.js"
         ],
         "format":[
-            "html:cucumber-report.html"
+            "html:cucumber-report.html",
+            "allure-cucumberjs/reporter"
         ]
     }
 }
