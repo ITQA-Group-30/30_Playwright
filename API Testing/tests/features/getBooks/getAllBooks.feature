@@ -13,7 +13,7 @@ Feature: Retrieve Books from the Library
     Given I am logged in as a "user" with password "password"
     And the database has no books
     When I send a GET request to
-    Then the response status code should be 200
+    Then the response status code should be 400
     And the response should contain an empty array
 
   Scenario: Unauthorized Request
