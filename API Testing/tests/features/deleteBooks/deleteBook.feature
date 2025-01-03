@@ -1,7 +1,7 @@
 Feature: Delete Books API
   Scenario: Successfully delete an existing book
     Given I am logged in as an authorized admin user
-    When I delete the book with ID 1
+    When I delete the book with ID 6
     Then the response status code should be 200
     And the response message should be "Book deleted successfully."
 
