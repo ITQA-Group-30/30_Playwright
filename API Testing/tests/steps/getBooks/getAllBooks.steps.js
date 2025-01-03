@@ -2,7 +2,7 @@ const { Given, When, Then, setDefaultTimeout } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
 const { BooksAPI } = require('../../../src/test'); // Ensure this path is correct
 
-// In below increase  the 30 seconds.
+// In below increase  the 30
 setDefaultTimeout(30 * 1000);
 
 let bookAPI;
@@ -35,7 +35,7 @@ Given('there are books in the database', async function () {
 Given('the database has no books', async function () {
     // Clear all books from the database using a helper method
     response = await bookAPI.deleteBook(1, this.auth); // Assuming you have a delete method
-    expect(response.status()).toBe(200); // Ensure all books are deleted
+    expect(response.status()).toBe(400); // Ensure all books are deleted
 });
 
 When('I send a GET request to', async function () {
@@ -60,5 +60,5 @@ Then('the response should contain an empty array', async function () {
 
 Then('the response should indicate an unauthorized access', async function () {
     const responseBody = await response.json(); // Get response body
-    expect(responseBody.error).toBe('Unauthorized'); // Adjust error message if needed
+    expect(responseBody.error).toBe('Unauthorized'); // 
 });

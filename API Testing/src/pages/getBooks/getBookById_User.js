@@ -1,3 +1,4 @@
+
 const Authentication = require('../../Authentication/Authentication');
 const CONFIG = require('../../utils/config');
 

@@ -4,11 +4,11 @@ Feature: Update Book API Tests
   So that I can ensure it handles various scenarios correctly
 
   Background:
-    Given I am logged in as aa "admin" with password "password"
+    Given I am logged in as a admin "admin" with password "password"
 
   @success
   Scenario: Successfully Update a Book
-    When I try to update a book with valid details
+    When try to update a book with valid details
       | id | title              | author          |
       | 1  | Updated Book Title | Updated Author  |
     Then the response status code should be aa 200
@@ -16,7 +16,7 @@ Feature: Update Book API Tests
 
   @invalid-id
   Scenario: Invalid Data Type for ID
-    When I try to update a book with invalid ID type
+    When  try to update a book with invalid ID type
       | id  | title              | author          |
       | abc | Updated Book Title | Updated Author  |
     Then the response status code should be aa 400
@@ -24,7 +24,7 @@ Feature: Update Book API Tests
 
   @empty-body
   Scenario: Empty Request Body
-    When I try to update a book with empty body
+    When try to update a book with empty body
       | id |
       | 1  |
     Then the response status code should be aa 400
@@ -32,7 +32,7 @@ Feature: Update Book API Tests
 
   @non-existent
   Scenario: Update Non-Existent Book
-    When I try to update a non-existent book
+    When  try to update a non-existent book
       | id  | title              | author          |
       | 999 | Updated Book Title | Updated Author  |
     Then the response status code should be 404
@@ -41,8 +41,8 @@ Feature: Update Book API Tests
 
   @forbidden
   Scenario: Update Book With Regular User
-    Given I am logged in as user "user" with password "password"
-    When I try to update a book with valid details
+    Given logged in as user "user" with password "password"
+    When try to update a book with valid details
       | id | title              | author          |
       | 1  | Updated Book Title | Updated Author  |
     Then the response status code should be 403

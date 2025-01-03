@@ -1,21 +1,16 @@
+@smoke
+Feature: Retrieve Book Details by ID (User)
 
-Feature: Admin Retrieve Book Details by ID
-  As an admin user
-  I want to retrieve book details by ID
-  So that I can view specific book information
+  @smoke
+  Scenario: Valid Request with Valid Book ID
+    Given a book exists in the database with a valid id
+    When a user sends a GET request to {id}
+    Then the response status code should be 200
+    And the response should contain the correct book details for the given id
 
-  Background:
-    Given I am authenticated as admin user
+  Scenario: Unauthorized Request to Retrieve Book by ID
+    Given the user is not authorized
+    When a user sends a GET request to {id} with an invalid token
+    Then the response status code should be 401
+    And the response should indicate unauthorized access
 
-  @getBookById_Admin_Negative
-  Scenario: Admin Request with Negative Book ID
-    When the admin sends a GET request with negative book id "-1"
-    Then the admin response status code should be 404
-    And the error message should be "Invalid | Empty Input Parameters in the Request"
-
-  @getBookById_Admin_Valid
-  Scenario: Admin Request with Valid Book ID
-    Given a book exists in the database
-    When the admin sends a GET request to fetch the book
-    Then the admin response status code should be 200
-    And the admin response should contain correct book details for the given id

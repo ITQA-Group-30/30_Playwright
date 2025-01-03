@@ -9,10 +9,17 @@ class DeleteBookPage {
     this.auth = new Authentication();
   }
 
-  async init() {
+  async init(username, password) {
     try {
       await this.waitForBackendService();
-      this.context = await this.auth.init(CONFIG.username, CONFIG.password);
+      if (username && password) {
+        this.context = await this.auth.init(username, password);
+      } else {
+        console.log(
+          "Initializing without credentials (unauthenticated requests)."
+        );
+        this.context = null; // No auth context for unauthenticated requests
+      }
     } catch (error) {
       console.error("Error initializing BookAPI:", error);
       throw new Error("Failed to initialize BookAPI");
@@ -64,6 +71,21 @@ class DeleteBookPage {
       return { status: response.status(), body };
     } catch (error) {
       console.error(`Error deleting book with ID ${bookId}:`, error.message);
+      return { status: 500, body: { message: error.message } };
+    }
+  }
+
+  async deleteBookWithoutAuth(bookId) {
+    const deleteURL = `${this.baseURL}/${bookId}`;
+    try {
+      console.log(`Sending DELETE request to: ${deleteURL} without auth`);
+      const response = await fetch(deleteURL, { method: "DELETE" });
+      const body = await response
+        .json()
+        .catch(() => ({ error: "Invalid JSON" }));
+      return { status: response.status, body };
+    } catch (error) {
+      console.error(`Error deleting book without auth:`, error.message);
       return { status: 500, body: { message: error.message } };
     }
   }

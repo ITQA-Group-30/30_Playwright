@@ -20,38 +20,43 @@ Given("I am logged in as an authorized admin user", async function () {
 });
 
 Given("I am logged in as an unauthorized user", async function () {
-  deleteBookPageI = new DeleteBookPage();
-  await deleteBookPageI.init(CONFIG.username, CONFIG.password);
+  deleteBookPage = new DeleteBookPage();
+  await deleteBookPage.init("user", "password");
 });
 
 Given("I am not logged in", async function () {
   deleteBookPage = new DeleteBookPage();
-  await ddeleteBookPage.init(null, null);
+  await deleteBookPage.init(null, null); // No username or password
 });
 
 When("I delete the book with ID {int}", async function (bookId) {
   response = await deleteBookPage.deleteBook(bookId);
+  console.log(`DeleteBook Response for ID ${bookId}:`, response);
 });
 
 When("I delete the book with ID {string}", async function (bookId) {
   response = await deleteBookPage.deleteBook(bookId);
+  console.log(`DeleteBook Response for ID ${bookId}:`, response);
 });
 
 When("I try to delete a book without authentication", async function () {
-  response = await deleteBookPage.deleteBookWithoutAuth(); // Pass a test book ID
+  response = await deleteBookPage.deleteBookWithoutAuth(103);
+  console.log("Response for unauthenticated delete:", response);
 });
 
 Then(
   "the response status code should be {int}",
   async function (expectedStatus) {
-    expect(response).toBe(expectedStatus);
+    console.log("Actual Response Status:", response.status);
+    expect(response.status).toBe(expectedStatus);
   }
 );
 
 Then(
   "the response message should be {string}",
   async function (expectedMessage) {
-    expect(response.body.message).toBe(expectedMessage);
+    console.log("Actual Response Body:", response.body);
+    expect(response.body.message || response.body.error).toBe(expectedMessage);
   }
 );
 
