@@ -1,15 +1,14 @@
 name: UI Automation Tests
 
-# Add permissions block at the top level
 permissions:
-  contents: read
+  contents: write  # Changed from read to write
   pages: write
   id-token: write
 
-# Configure GitHub Pages
 env:
-  # Name of the artifact containing the site contents
   SITE_ARTIFACT: "github-pages"
+  # Add debug logging for GitHub Actions
+  ACTIONS_STEP_DEBUG: true
 
 on:
   push:
@@ -33,6 +32,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for proper GitHub Pages deployment
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
@@ -54,10 +55,11 @@ jobs:
 
       - name: Run Cucumber Tests
         run: |
-          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npx cucumber-js
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npx cucumber-js --retry 1
         env:
           CI: true
           PLAYWRIGHT_HEADLESS: true
+          DEBUG: pw:api  # Add Playwright debug logging
 
       - name: Generate Allure Report
         if: always()
@@ -75,28 +77,14 @@ jobs:
             ./UI Testing/test-results/
           retention-days: 14
 
-      # Configure GitHub Pages
-      - name: Setup Pages
+      # Switch back to using peaceiris/actions-gh-pages for deployment
+      - name: Deploy Report to GitHub Pages
         if: always()
-        uses: actions/configure-pages@v2
-
-      - name: Upload Pages Artifact
-        if: always()
-        uses: actions/upload-pages-artifact@v1
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          path: './UI Testing/allure-report'
-
-  # Add a separate deployment job
-  deploy:
-    needs: ui-tests
-    runs-on: ubuntu-latest
-    if: always()
-    
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v1
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./UI Testing/allure-report
+          enable_jekyll: false
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy Allure report to GitHub Pages'
