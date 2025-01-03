@@ -1,0 +1,11 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"As an admin user
+  I want to manage system users
+  So that I can control system access","5862","Search for system users","","Fri Jan 03 13:30:22 UTC 2025","passed","Fri Jan 03 13:30:28 UTC 2025","","","",""
+"As an employee
+  I want to view my personal information
+  So that I can verify my details","2865","View personal details","","Fri Jan 03 13:31:04 UTC 2025","passed","Fri Jan 03 13:31:07 UTC 2025","","","",""
+"","27553","Admin adds a new user","","Fri Jan 03 13:29:55 UTC 2025","passed","Fri Jan 03 13:30:22 UTC 2025","","","",""
+"As an employee
+  I want to view and filter leave requests
+  So that I can track leave status","17985","Filter and view leave requests","","Fri Jan 03 13:30:46 UTC 2025","failed","Fri Jan 03 13:31:04 UTC 2025","","","",""
