@@ -1,5 +1,16 @@
 name: UI Automation Tests
 
+# Add permissions block at the top level
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Configure GitHub Pages
+env:
+  # Name of the artifact containing the site contents
+  SITE_ARTIFACT: "github-pages"
+
 on:
   push:
     branches: [main, master, development]
@@ -64,10 +75,28 @@ jobs:
             ./UI Testing/test-results/
           retention-days: 14
 
-      - name: Deploy Report to GitHub Pages
+      # Configure GitHub Pages
+      - name: Setup Pages
         if: always()
-        uses: peaceiris/actions-gh-pages@v3
+        uses: actions/configure-pages@v2
+
+      - name: Upload Pages Artifact
+        if: always()
+        uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./UI Testing/allure-report
-          destination_dir: ui-test-report
+          path: './UI Testing/allure-report'
+
+  # Add a separate deployment job
+  deploy:
+    needs: ui-tests
+    runs-on: ubuntu-latest
+    if: always()
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
