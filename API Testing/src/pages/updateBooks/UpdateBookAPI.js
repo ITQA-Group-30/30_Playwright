@@ -1,4 +1,4 @@
-// src/pages/UpdateBookAPI.js
+
 const { request } = require('@playwright/test');
 const Authentication = require('../../Authentication/Authentication');
 const CONFIG = require('../../utils/config');

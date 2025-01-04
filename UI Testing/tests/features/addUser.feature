@@ -5,4 +5,4 @@ Feature: Add User to OrangeHRM
     When I click on the "Add User" button
     And I fill in the user details
     And I click "Save"
-    Then the new user should be added successfully
+

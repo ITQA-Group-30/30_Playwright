@@ -1,20 +1,21 @@
-const { request } = require('@playwright/test');
 const CONFIG = require('../../utils/config');
+const Authentication = require('../../Authentication/Authentication');
 
 class BookAPI {
     constructor() {
         this.context = null;
         this.baseURL = `${CONFIG.baseURL}/api/books`;
+        this.auth = new Authentication(); // Instantiate the Authentication class
     }
 
     async init() {
-        this.context = await request.newContext({
-            baseURL: CONFIG.baseURL,
-            extraHTTPHeaders: {
-                'Authorization': `Basic ${Buffer.from(`${CONFIG.username}:${CONFIG.password}`).toString('base64')}`,
-                'Content-Type': 'application/json',
-            },
-        });
+        try {
+            // Initialize the authentication context
+            this.context = await this.auth.init(CONFIG.username, CONFIG.password);
+        } catch (error) {
+            console.error('Error initializing BookAPI:', error);
+            throw new Error('Failed to initialize BookAPI');
+        }
     }
 
     async createBook(bookDetails) {

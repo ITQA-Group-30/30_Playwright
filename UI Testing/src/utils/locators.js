@@ -67,12 +67,50 @@ const LOCATORS = {
         CHECKBOXES: '.oxd-checkbox-wrapper input'
     },
     ADDUSER: {
-        ADD_USER_BUTTON: 'button#btnAdd', // Locator for Add User button
-        USERNAME_INPUT: 'input#systemUser_userName', // Locator for username input
-        PASSWORD_INPUT: 'input#systemUser_password', // Locator for password input
-        CONFIRM_PASSWORD_INPUT: 'input#systemUser_confirmPassword', // Locator for confirm password input
-        SAVE_BUTTON: 'input#btnSave', // Locator for save button
-        SUCCESS_MESSAGE: 'div.success', // Locator for success message
+        ADD_USER_BUTTON: 'button#btnAdd',
+        USERNAME_INPUT: 'input#systemUser_userName',
+        PASSWORD_INPUT: 'input#systemUser_password',
+        CONFIRM_PASSWORD_INPUT: 'input#systemUser_confirmPassword',
+        SAVE_BUTTON: 'input#btnSave',
+        SUCCESS_MESSAGE: 'div.success',
+    },
+    DASHBOARD: {
+        WELCOME_TEXT: '.oxd-text.oxd-text--h6', // Locator for the welcome text
+        MENU_PANEL: '.oxd-sidepanel', // Locator for the side navigation panel
+        DASHBOARD_CARDS: '.oxd-grid-item', // Locator for dashboard cards
+    },
+
+    PROFILE: {
+        UPLOAD_INPUT: 'input[type="file"]', // Locator for file input
+        SAVE_BUTTON: '.oxd-button--secondary', // Locator for the Save button
+        SUCCESS_MESSAGE: '.oxd-toast .oxd-toast-content', // Locator for success message
+        UPLOADED_IMAGE: '.profile-pic img', // Locator for the uploaded profile picture
+    },
+
+    BUZZ: {
+        POST_INPUT: 'input[placeholder="What\'s on your mind?"]',
+        POST_BUTTON: 'button[role="button"][name="Post"][exact="true"]',
+        SUCCESS_MESSAGE: '.oxd-toast-content--success'
+    },
+
+    PERFORMANCE: {
+        EMPLOYEE_NAME: '[placeholder="Type for hints..."]',  // Locator for employee name input field
+        FROM_DATE: '.oxd-date-input > .oxd-icon',  // Locator for from date field (calendar icon)
+        TO_DATE: '.oxd-date-input > .oxd-icon:nth-child(2)',  // Locator for to date field (calendar icon)
+    },
+
+    CLAIM: {
+        EMPLOYEE_NAME: 'input[placeholder="Type for hints..."]:nth-child(1)',
+        REFERENCE_ID: 'input[placeholder="Type for hints..."]:nth-child(2)',
+        EVENT_NAME_DROPDOWN: 'form i:first-of-type',
+        STATUS_DROPDOWN: 'form i:nth-of-type(2)',
+        SEARCH_BUTTON: 'button:has-text("Search")'
+    },
+
+    TIME_SHEET: {
+        EMPLOYEE_NAME_INPUT: '[placeholder="Type for hints..."]',  // Locator for the employee name input field
+        VIEW_BUTTON: '[role="button"][name="View"]',  // Locator for "View" button
+        SUBMIT_BUTTON: '[role="button"][name="Submit"]', // Locator for "Submit" button
     }
 };
 
