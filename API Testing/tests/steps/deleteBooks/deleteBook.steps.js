@@ -25,7 +25,7 @@ Given("I am logged in as an unauthorized user", async function () {
 
 Given("I am not logged in", async function () {
   deleteBookPage = new DeleteBookPage();
-  await ddeleteBookPage.init(null, null);
+  await deleteBookPage.init(null, null);
 });
 
 When("I delete the book with ID {int}", async function (bookId) {
