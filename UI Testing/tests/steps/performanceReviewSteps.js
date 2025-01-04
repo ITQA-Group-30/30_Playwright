@@ -1,7 +1,7 @@
 // tests/steps/performanceReviewSteps.js
 const { Given, When, Then } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
-const PerformancePage = require('../../src/pages/performancePage');
+const PerformancePage = require('../../src/pages/PerformancePage');
 const config = require('../../src/utils/config');
 
 let performancePage;
