@@ -15,7 +15,8 @@
         ],
         "format":[
             "html:cucumber-report.html",
-            "allure-cucumberjs/reporter"
+            "allure-cucumberjs/reporter",
+            "json:allure-results/results.json"
         ]
     }
 }

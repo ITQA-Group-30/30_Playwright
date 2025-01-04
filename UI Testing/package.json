@@ -13,12 +13,12 @@
     "@playwright/test": "^1.49.1",
     "@types/node": "^22.10.2",
     "allure-commandline": "^2.32.0",
-    "allure-cucumberjs": "^3.0.7"
+    "allure-cucumberjs": "^3.0.7",
+    "allure-playwright": "^3.0.7"
   },
   "dependencies": {
     "@cucumber/cucumber": "^11.1.1",
     "allure-mocha": "^3.0.7",
-    "allure-playwright": "^3.0.7",
     "ui-testing": "file:"
   }
 }
