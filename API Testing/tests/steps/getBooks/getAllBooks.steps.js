@@ -56,3 +56,6 @@ Then('the response should indicate an unauthorized access', async function () {
     const responseBody = await response.json(); // Get response body
     expect(responseBody.error).toBe('Unauthorized'); // Ensure correct error message
 });
+Given(/^I am logged in as an invalid "([^"]*)" with password "([^"]*)"$/, function () {
+
+});
