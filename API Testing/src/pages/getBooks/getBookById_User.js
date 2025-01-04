@@ -1,17 +1,22 @@
-
 const Authentication = require('../../Authentication/Authentication');
 const CONFIG = require('../../utils/config');
 
 class BookAPI {
-    constructor() {
-        this.auth = new Authentication();
-        this.baseURL = CONFIG.baseURL;
+    constructor(auth = new Authentication(), config = CONFIG) {
+        this.auth = auth;
+        this.baseURL = `${config.baseURL}/api/books`;
         this.context = null;
     }
 
-    async init(username, password) {
+    // Initialization method with hardcoded username and password
+    async init() {
         try {
             await this.waitForBackendService();
+            
+            // Hardcoded credentials
+            const username = 'user';
+            const password = 'password';
+            
             this.context = await this.auth.init(username, password);
             return this;
         } catch (error) {
@@ -19,43 +24,49 @@ class BookAPI {
         }
     }
 
+    // Wait for backend service to become available
     async waitForBackendService(maxRetries = 5, interval = 2000) {
         for (let i = 0; i < maxRetries; i++) {
             try {
-                const response = await fetch(`${this.baseURL}/api/books`);
-                if (response.status === 401) { // Service is up but requires auth
+                const response = await fetch(this.baseURL);
+                if (response.status === 401 || response.ok) { // Service is up
                     return true;
                 }
             } catch (error) {
-                console.log(`Waiting for backend service... Attempt ${i + 1}/${maxRetries}`);
+                console.warn(`Waiting for backend service... Attempt ${i + 1}/${maxRetries}`);
                 if (i === maxRetries - 1) {
-                    throw new Error('Backend service not available. Please ensure the JAR file is running.');
+                    throw new Error('Backend service not available. Ensure the JAR file is running.');
                 }
                 await new Promise(resolve => setTimeout(resolve, interval));
             }
         }
     }
 
+    // Validate the book ID
+    validateBookId(id) {
+        if (!id || typeof id !== 'number' || id < 0) {
+            throw new Error('Invalid or empty input parameters in the request');
+        }
+    }
+
+    // Get book by ID
     async getBookById(id) {
         try {
-            // Check for negative ID
-            if (id < 0) {
-                return {
-                    status: 404,
-                    body: { message: "Invalid | Empty Input Parameters in the Request" }
-                };
+            this.validateBookId(id);
+            if (!this.context) {
+                throw new Error('Authentication required to access this resource.');
             }
 
-            const response = await this.context.get(`${this.baseURL}/api/books/${id}`);
-
+            const response = await this.context.get(`${this.baseURL}/${id}`);
             return {
                 status: response.status(),
                 body: await response.json().catch(() => ({}))
             };
         } catch (error) {
             console.error('Error getting book:', error);
+            const status = error.message.includes('Invalid') ? 400 : error.message.includes('Authentication') ? 401 : 500;
             return {
-                status: 500,
+                status,
                 body: { message: error.message }
             };
         }

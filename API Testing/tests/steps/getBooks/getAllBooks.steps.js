@@ -1,41 +1,35 @@
+
+
 const { Given, When, Then, setDefaultTimeout } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
 const { BooksAPI } = require('../../../src/test'); // Ensure this path is correct
 
-// In below increase  the 30
+// Set default timeout for the steps
 setDefaultTimeout(30 * 1000);
 
 let bookAPI;
 let response;
 
-Given('I am logged in as a {string} with password {string}', async function (username, password) {
+Given('I am logged in as a {string} with password {string} and the database has {string}', async function (username, password, bookStatus) {
     bookAPI = new BooksAPI();  // Initialize BooksAPI
     await bookAPI.init();  // Initialize context
     const auth = Buffer.from(`${username}:${password}`).toString('base64');
     this.auth = auth; // Store authorization for later use
-});
 
-Given('I am logged in with an invalid {string} with password {string}', async function (username, password) {
-    bookAPI = new BooksAPI();
-    await bookAPI.init();
-    const auth = Buffer.from(`${username}:${password}`).toString('base64');
-    this.auth = auth; // Store invalid authorization for later use
-});
-
-Given('there are books in the database', async function () {
-    const book = {
-        title: 'Sample Book',
-        author: 'Author Name',
-        price: 10.99,
-    };
-    response = await bookAPI.createBook(book, this.auth); // Use stored authorization
-    expect(response.status()).toBe(201); // Ensure book is created successfully
-});
-
-Given('the database has no books', async function () {
-    // Clear all books from the database using a helper method
-    response = await bookAPI.deleteBook(1, this.auth); // Assuming you have a delete method
-    expect(response.status()).toBe(400); // Ensure all books are deleted
+    // Handle different book statuses based on the scenario
+    if (bookStatus === 'books') {
+        const book = {
+            title: 'Sample Book',
+            author: 'Author Name',
+            price: 10.99,
+        };
+        response = await bookAPI.createBook(book, this.auth); // Use stored authorization
+        expect(response.status()).toBe(201); // Ensure book is created successfully
+    } else if (bookStatus === 'no books') {
+        // Clear all books from the database using a helper method
+        response = await bookAPI.deleteAllBooks(this.auth); // Assuming you have a deleteAllBooks method
+        expect(response.status()).toBe(200); // Ensure all books are deleted successfully
+    }
 });
 
 When('I send a GET request to', async function () {
@@ -60,5 +54,5 @@ Then('the response should contain an empty array', async function () {
 
 Then('the response should indicate an unauthorized access', async function () {
     const responseBody = await response.json(); // Get response body
-    expect(responseBody.error).toBe('Unauthorized'); // 
+    expect(responseBody.error).toBe('Unauthorized'); // Ensure correct error message
 });
