@@ -4,7 +4,7 @@ Feature: Update Book API Tests
   So that I can ensure it handles various scenarios correctly
 
   Background:
-    Given I am logged in as a admin with password
+    Given I am logged in as a admin "admin" with password "password"
 
   @success
   Scenario: Successfully Update a Book
