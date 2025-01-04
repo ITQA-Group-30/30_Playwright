@@ -1,6 +1,8 @@
 const { Given, When, Then, setDefaultTimeout } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
 const BookAPI = require('../../../src/pages/getBooks/getBookById_Admin');
+const CONFIG = require('../../../src/utils/config');
+
 
 setDefaultTimeout(30 * 1000);
 
@@ -11,7 +13,7 @@ let createdBook;
 
 Given('I am authenticated as admin user', async function () {
     bookAPI = new BookAPI();
-    await bookAPI.init('admin', 'password');
+    await bookAPI.init(CONFIG.username, CONFIG.password);
 });
 
 

@@ -7,7 +7,7 @@ setDefaultTimeout(30 * 1000);
 let updateBookAPI;
 let response;
 
-Given('I am logged in as a admin {string} with password {string}', async function(username, password) {
+Given('I am logged in as a admin with password', async function(username, password) {
     updateBookAPI = new UpdateBookAPI();
     await updateBookAPI.init(username, password);
 });
@@ -42,7 +42,7 @@ Then('the response message should be aa {string}', async function(expectedMessag
 });
 
 After(async function() {
-    // Cleanup after each scenario if needed
+    // Cleanup
 });
 
 Given('logged in as user {string} with password {string}', async function(username, password) {
