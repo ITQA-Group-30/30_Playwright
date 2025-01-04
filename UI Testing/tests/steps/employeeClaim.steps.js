@@ -1,6 +1,6 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const { expect } = require('@playwright/test');
-const ClaimPage = require('../../src/pages/claimPage');
+const ClaimPage = require('../../src/pages/ClaimPage');
 const config = require('../../src/utils/config');
 
 let claimPage;
