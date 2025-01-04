@@ -64,9 +64,7 @@ class DeleteBookPage {
     try {
       console.log(`Sending DELETE request to: ${deleteURL}`);
       const response = await this.context.delete(deleteURL);
-      const body = await response
-        .json()
-        .catch(() => ({ error: "Invalid JSON" }));
+      const body = await response.text();
       console.log(`DeleteBook Response for ID ${bookId}:`, body);
       return { status: response.status(), body };
     } catch (error) {
